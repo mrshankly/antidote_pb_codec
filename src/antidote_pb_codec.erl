@@ -44,6 +44,7 @@
 -type read_result_in() ::
   {antidote_crdt_counter_fat, integer()}
 | {antidote_crdt_counter_pn, integer()}
+| {antidote_crdt_counter_secure, integer()}
 | {antidote_crdt_set_aw, [binary()]}
 | {antidote_crdt_set_rw, [binary()]}
 | {antidote_crdt_register_lww, binary()}
@@ -491,32 +492,34 @@ encode_read_objects(Objects, TxId) ->
 %%AWMAP = 9;
 %%RWSET = 10;
 
-encode_type(antidote_crdt_counter_pn)   -> 'COUNTER';
-encode_type(antidote_crdt_counter_fat)  -> 'FATCOUNTER';
-encode_type(antidote_crdt_counter_b)    -> 'BCOUNTER';
-encode_type(antidote_crdt_set_aw)       -> 'ORSET';
-encode_type(antidote_crdt_set_rw)       -> 'RWSET';
-encode_type(antidote_crdt_register_lww) -> 'LWWREG';
-encode_type(antidote_crdt_register_mv)  -> 'MVREG';
-encode_type(antidote_crdt_map_go)       -> 'GMAP';
-encode_type(antidote_crdt_map_rr)       -> 'RRMAP';
-encode_type(antidote_crdt_flag_ew)      -> 'FLAG_EW';
-encode_type(antidote_crdt_flag_dw)      -> 'FLAG_DW';
-encode_type(T)                          -> erlang:error({unknown_crdt_type, T}).
+encode_type(antidote_crdt_counter_pn)     -> 'COUNTER';
+encode_type(antidote_crdt_counter_fat)    -> 'FATCOUNTER';
+encode_type(antidote_crdt_counter_b)      -> 'BCOUNTER';
+encode_type(antidote_crdt_counter_secure) -> 'SECURECOUNTER';
+encode_type(antidote_crdt_set_aw)         -> 'ORSET';
+encode_type(antidote_crdt_set_rw)         -> 'RWSET';
+encode_type(antidote_crdt_register_lww)   -> 'LWWREG';
+encode_type(antidote_crdt_register_mv)    -> 'MVREG';
+encode_type(antidote_crdt_map_go)         -> 'GMAP';
+encode_type(antidote_crdt_map_rr)         -> 'RRMAP';
+encode_type(antidote_crdt_flag_ew)        -> 'FLAG_EW';
+encode_type(antidote_crdt_flag_dw)        -> 'FLAG_DW';
+encode_type(T)                            -> erlang:error({unknown_crdt_type, T}).
 
 
-decode_type('COUNTER')    -> antidote_crdt_counter_pn;
-decode_type('FATCOUNTER') -> antidote_crdt_counter_fat;
-decode_type('BCOUNTER')   -> antidote_crdt_counter_b;
-decode_type('ORSET')      -> antidote_crdt_set_aw;
-decode_type('LWWREG')     -> antidote_crdt_register_lww;
-decode_type('MVREG')      -> antidote_crdt_register_mv;
-decode_type('GMAP')       -> antidote_crdt_map_go;
-decode_type('RWSET')      -> antidote_crdt_set_rw;
-decode_type('RRMAP')      -> antidote_crdt_map_rr;
-decode_type('FLAG_EW')    -> antidote_crdt_flag_ew;
-decode_type('FLAG_DW')    -> antidote_crdt_flag_dw;
-decode_type(T)            -> erlang:error({unknown_crdt_type_protobuf, T}).
+decode_type('COUNTER')       -> antidote_crdt_counter_pn;
+decode_type('FATCOUNTER')    -> antidote_crdt_counter_fat;
+decode_type('BCOUNTER')      -> antidote_crdt_counter_b;
+decode_type('SECURECOUNTER') -> antidote_crdt_counter_secure;
+decode_type('ORSET')         -> antidote_crdt_set_aw;
+decode_type('LWWREG')        -> antidote_crdt_register_lww;
+decode_type('MVREG')         -> antidote_crdt_register_mv;
+decode_type('GMAP')          -> antidote_crdt_map_go;
+decode_type('RWSET')         -> antidote_crdt_set_rw;
+decode_type('RRMAP')         -> antidote_crdt_map_rr;
+decode_type('FLAG_EW')       -> antidote_crdt_flag_ew;
+decode_type('FLAG_DW')       -> antidote_crdt_flag_dw;
+decode_type(T)               -> erlang:error({unknown_crdt_type_protobuf, T}).
 
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -530,6 +533,8 @@ encode_update_operation(antidote_crdt_counter_pn, Op_Param) ->
 encode_update_operation(antidote_crdt_counter_fat, Op_Param) ->
   #'ApbUpdateOperation'{counterop = encode_counter_update(Op_Param)};
 encode_update_operation(antidote_crdt_counter_b, Op_Param) ->
+  #'ApbUpdateOperation'{counterop = encode_counter_update(Op_Param)};
+encode_update_operation(antidote_crdt_counter_secure, Op_Param) ->
   #'ApbUpdateOperation'{counterop = encode_counter_update(Op_Param)};
 encode_update_operation(antidote_crdt_set_aw, Op_Param) ->
   #'ApbUpdateOperation'{setop = encode_set_update(Op_Param)};
@@ -571,6 +576,8 @@ encode_crdt_type(antidote_crdt_register_mv) ->
 encode_crdt_type(antidote_crdt_counter_pn) ->
     counter;
 encode_crdt_type(antidote_crdt_counter_fat) ->
+    counter;
+encode_crdt_type(antidote_crdt_counter_secure) ->
     counter;
 encode_crdt_type(antidote_crdt_set_aw) ->
     set;
