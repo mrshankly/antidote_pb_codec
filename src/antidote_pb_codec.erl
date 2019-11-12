@@ -132,35 +132,37 @@ encode_response(Data) ->
 
 -type message() :: term().
 
-message_type_to_code('ApbErrorResp')             -> 0;
-message_type_to_code('ApbRegUpdate')             -> 107;
-message_type_to_code('ApbGetRegResp')            -> 108;
-message_type_to_code('ApbCounterUpdate')         -> 109;
-message_type_to_code('ApbGetCounterResp')        -> 110;
-message_type_to_code('ApbOperationResp')         -> 111;
-message_type_to_code('ApbSetUpdate')             -> 112;
-message_type_to_code('ApbGetSetResp')            -> 113;
-message_type_to_code('ApbTxnProperties')         -> 114;
-message_type_to_code('ApbBoundObject')           -> 115;
-message_type_to_code('ApbReadObjects')           -> 116;
-message_type_to_code('ApbUpdateOp')              -> 117;
-message_type_to_code('ApbUpdateObjects')         -> 118;
-message_type_to_code('ApbStartTransaction')      -> 119;
-message_type_to_code('ApbAbortTransaction')      -> 120;
-message_type_to_code('ApbCommitTransaction')     -> 121;
-message_type_to_code('ApbStaticUpdateObjects')   -> 122;
-message_type_to_code('ApbStaticReadObjects')     -> 123;
-message_type_to_code('ApbStartTransactionResp')  -> 124;
-message_type_to_code('ApbReadObjectResp')        -> 125;
-message_type_to_code('ApbReadObjectsResp')       -> 126;
-message_type_to_code('ApbCommitResp')            -> 127;
-message_type_to_code('ApbStaticReadObjectsResp') -> 128;
+message_type_to_code('ApbErrorResp')                   -> 0;
+message_type_to_code('ApbRegUpdate')                   -> 107;
+message_type_to_code('ApbGetRegResp')                  -> 108;
+message_type_to_code('ApbCounterUpdate')               -> 109;
+message_type_to_code('ApbGetCounterResp')              -> 110;
+message_type_to_code('ApbOperationResp')               -> 111;
+message_type_to_code('ApbSetUpdate')                   -> 112;
+message_type_to_code('ApbGetSetResp')                  -> 113;
+message_type_to_code('ApbTxnProperties')               -> 114;
+message_type_to_code('ApbBoundObject')                 -> 115;
+message_type_to_code('ApbReadObjects')                 -> 116;
+message_type_to_code('ApbUpdateOp')                    -> 117;
+message_type_to_code('ApbUpdateObjects')               -> 118;
+message_type_to_code('ApbStartTransaction')            -> 119;
+message_type_to_code('ApbAbortTransaction')            -> 120;
+message_type_to_code('ApbCommitTransaction')           -> 121;
+message_type_to_code('ApbStaticUpdateObjects')         -> 122;
+message_type_to_code('ApbStaticReadObjects')           -> 123;
+message_type_to_code('ApbStartTransactionResp')        -> 124;
+message_type_to_code('ApbReadObjectResp')              -> 125;
+message_type_to_code('ApbReadObjectsResp')             -> 126;
+message_type_to_code('ApbCommitResp')                  -> 127;
+message_type_to_code('ApbStaticReadObjectsResp')       -> 128;
 message_type_to_code('ApbCreateDC')                    -> 129;
 message_type_to_code('ApbCreateDCResp')                -> 130;
 message_type_to_code('ApbConnectToDCs')                -> 131;
 message_type_to_code('ApbConnectToDCsResp')            -> 132;
 message_type_to_code('ApbGetConnectionDescriptor')     -> 133;
-message_type_to_code('ApbGetConnectionDescriptorResp') -> 134.
+message_type_to_code('ApbGetConnectionDescriptorResp') -> 134;
+message_type_to_code('ApbSecureCounterUpdate')         -> 135;
+message_type_to_code('ApbGetSecureCounterResp')        -> 136.
 
 message_code_to_type(0)   -> 'ApbErrorResp';
 message_code_to_type(107) -> 'ApbRegUpdate';
@@ -190,7 +192,9 @@ message_code_to_type(130) -> 'ApbCreateDCResp';
 message_code_to_type(131) -> 'ApbConnectToDCs';
 message_code_to_type(132) -> 'ApbConnectToDCsResp';
 message_code_to_type(133) -> 'ApbGetConnectionDescriptor';
-message_code_to_type(134) -> 'ApbGetConnectionDescriptorResp'.
+message_code_to_type(134) -> 'ApbGetConnectionDescriptorResp';
+message_code_to_type(135) -> 'ApbSecureCounterUpdate';
+message_code_to_type(136) -> 'ApbGetSecureCounterResp'.
 
 -spec encode(message()) -> iolist().
 encode(Msg) ->
@@ -535,7 +539,7 @@ encode_update_operation(antidote_crdt_counter_fat, Op_Param) ->
 encode_update_operation(antidote_crdt_counter_b, Op_Param) ->
   #'ApbUpdateOperation'{counterop = encode_counter_update(Op_Param)};
 encode_update_operation(antidote_crdt_counter_secure, Op_Param) ->
-  #'ApbUpdateOperation'{counterop = encode_counter_update(Op_Param)};
+  #'ApbUpdateOperation'{securecounterop = encode_secure_counter_update(Op_Param)};
 encode_update_operation(antidote_crdt_set_aw, Op_Param) ->
   #'ApbUpdateOperation'{setop = encode_set_update(Op_Param)};
 encode_update_operation(antidote_crdt_set_rw, Op_Param) ->
@@ -557,6 +561,8 @@ encode_update_operation(Type, _Op) ->
 
 decode_update_operation(#'ApbUpdateOperation'{counterop = Op}) when Op /= undefined ->
   decode_counter_update(Op);
+decode_update_operation(#'ApbUpdateOperation'{securecounterop = Op}) when Op /= undefined ->
+  decode_secure_counter_update(Op);
 decode_update_operation(#'ApbUpdateOperation'{setop = Op}) when Op /= undefined ->
   decode_set_update(Op);
 decode_update_operation(#'ApbUpdateOperation'{regop = Op}) when Op /= undefined ->
@@ -578,7 +584,7 @@ encode_crdt_type(antidote_crdt_counter_pn) ->
 encode_crdt_type(antidote_crdt_counter_fat) ->
     counter;
 encode_crdt_type(antidote_crdt_counter_secure) ->
-    counter;
+    securecounter;
 encode_crdt_type(antidote_crdt_set_aw) ->
     set;
 encode_crdt_type(antidote_crdt_set_rw) ->
@@ -598,6 +604,8 @@ encode_read_object_resp(mvreg, Val) ->
   #'ApbReadObjectResp'{mvreg = #'ApbGetMVRegResp'{values = Val}};
 encode_read_object_resp(counter, Val) ->
   #'ApbReadObjectResp'{counter = #'ApbGetCounterResp'{value = Val}};
+encode_read_object_resp(securecounter, Val) ->
+  #'ApbReadObjectResp'{securecounter = #'ApbGetSecureCounterResp'{value = integer_to_list(Val)}};
 encode_read_object_resp(set, Val) ->
   #'ApbReadObjectResp'{set = #'ApbGetSetResp'{value = Val}};
 encode_read_object_resp(map, Val) ->
@@ -607,6 +615,13 @@ encode_read_object_resp(flag, Val) ->
 
 decode_read_object_resp(#'ApbReadObjectResp'{counter = #'ApbGetCounterResp'{value = Val}}) ->
   {counter, Val};
+decode_read_object_resp(#'ApbReadObjectResp'{securecounter = #'ApbGetSecureCounterResp'{value = Val}}) ->
+  case string:to_integer(Val) of
+    {Value, []} ->
+      {securecounter, Value};
+    _ ->
+      throw(invalid_securecounter_value)
+  end;
 decode_read_object_resp(#'ApbReadObjectResp'{set = #'ApbGetSetResp'{value = Val}}) ->
   {set, Val};
 decode_read_object_resp(#'ApbReadObjectResp'{reg = #'ApbGetRegResp'{value = Val}}) ->
@@ -657,7 +672,6 @@ encode_counter_update({increment, Amount}) ->
 encode_counter_update({decrement, Amount}) ->
   #'ApbCounterUpdate'{inc = -Amount}.
 
-
 decode_counter_update(Update) ->
   #'ApbCounterUpdate'{inc = I} = Update,
   case I of
@@ -665,6 +679,33 @@ decode_counter_update(Update) ->
     I -> {increment, I} % negative value for I indicates decrement
   end.
 
+% secure counter updates
+
+encode_secure_counter_update({increment, Delta}) ->
+  #'ApbSecureCounterUpdate'{inc = integer_to_list(Delta)};
+encode_secure_counter_update({increment, Delta, NSquare}) ->
+  #'ApbSecureCounterUpdate'{inc = integer_to_list(Delta), nsquare = integer_to_list(NSquare)};
+encode_secure_counter_update({decrement, Delta}) ->
+  #'ApbSecureCounterUpdate'{inc = integer_to_list(-Delta)};
+encode_secure_counter_update({decrement, Delta, NSquare}) ->
+  #'ApbSecureCounterUpdate'{inc = integer_to_list(-Delta), nsquare = integer_to_list(NSquare)}.
+
+decode_secure_counter_update(Update) ->
+  #'ApbSecureCounterUpdate'{inc = Delta, nsquare = NSquare} = Update,
+  D = case string:to_integer(Delta) of
+    {DNum, []} -> DNum;
+    {DNum, <<>>} -> DNum;
+    _ -> throw(invalid_securecounter_value)
+  end,
+  case NSquare of
+    undefined -> {increment, D};
+    _ ->
+      case string:to_integer(NSquare) of
+        {NSNum, []} -> {increment, D, NSNum};
+        {NSNum, <<>>} -> {increment, D, NSNum};
+        _ -> throw(invalid_securecounter_value)
+      end
+  end.
 
 % register updates
 

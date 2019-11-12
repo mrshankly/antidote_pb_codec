@@ -29,6 +29,21 @@
         }).
 -endif.
 
+-ifndef('APBSECURECOUNTERUPDATE_PB_H').
+-define('APBSECURECOUNTERUPDATE_PB_H', true).
+-record('ApbSecureCounterUpdate',
+        {inc                    :: iodata(),        % = 1
+         nsquare                :: iodata() | undefined % = 2
+        }).
+-endif.
+
+-ifndef('APBGETSECURECOUNTERRESP_PB_H').
+-define('APBGETSECURECOUNTERRESP_PB_H', true).
+-record('ApbGetSecureCounterResp',
+        {value                  :: iodata()         % = 1
+        }).
+-endif.
+
 -ifndef('APBSETUPDATE_PB_H').
 -define('APBSETUPDATE_PB_H', true).
 -record('ApbSetUpdate',
@@ -177,7 +192,8 @@
          regop                  :: antidote_pb:'ApbRegUpdate'() | undefined, % = 3
          mapop                  :: antidote_pb:'ApbMapUpdate'() | undefined, % = 5
          resetop                :: antidote_pb:'ApbCrdtReset'() | undefined, % = 6
-         flagop                 :: antidote_pb:'ApbFlagUpdate'() | undefined % = 7
+         flagop                 :: antidote_pb:'ApbFlagUpdate'() | undefined, % = 7
+         securecounterop        :: antidote_pb:'ApbSecureCounterUpdate'() | undefined % = 8
         }).
 -endif.
 
@@ -244,7 +260,8 @@
          reg                    :: antidote_pb:'ApbGetRegResp'() | undefined, % = 3
          mvreg                  :: antidote_pb:'ApbGetMVRegResp'() | undefined, % = 4
          map                    :: antidote_pb:'ApbGetMapResp'() | undefined, % = 6
-         flag                   :: antidote_pb:'ApbGetFlagResp'() | undefined % = 7
+         flag                   :: antidote_pb:'ApbGetFlagResp'() | undefined, % = 7
+         securecounter          :: antidote_pb:'ApbGetSecureCounterResp'() | undefined % = 8
         }).
 -endif.
 
