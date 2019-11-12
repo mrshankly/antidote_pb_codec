@@ -617,10 +617,9 @@ decode_read_object_resp(#'ApbReadObjectResp'{counter = #'ApbGetCounterResp'{valu
   {counter, Val};
 decode_read_object_resp(#'ApbReadObjectResp'{securecounter = #'ApbGetSecureCounterResp'{value = Val}}) ->
   case string:to_integer(Val) of
-    {Value, []} ->
-      {securecounter, Value};
-    _ ->
-      throw(invalid_securecounter_value)
+    {Value, []} -> {securecounter, Value};
+    {Value, <<>>} -> {securecounter, Value};
+    _ -> throw(invalid_securecounter_value)
   end;
 decode_read_object_resp(#'ApbReadObjectResp'{set = #'ApbGetSetResp'{value = Val}}) ->
   {set, Val};
@@ -681,14 +680,14 @@ decode_counter_update(Update) ->
 
 % secure counter updates
 
+encode_secure_counter_update({increment, {Delta, NSquare}}) ->
+  #'ApbSecureCounterUpdate'{inc = integer_to_list(Delta), nsquare = integer_to_list(NSquare)};
 encode_secure_counter_update({increment, Delta}) ->
   #'ApbSecureCounterUpdate'{inc = integer_to_list(Delta)};
-encode_secure_counter_update({increment, Delta, NSquare}) ->
-  #'ApbSecureCounterUpdate'{inc = integer_to_list(Delta), nsquare = integer_to_list(NSquare)};
+encode_secure_counter_update({decrement, {Delta, NSquare}}) ->
+  #'ApbSecureCounterUpdate'{inc = integer_to_list(-Delta), nsquare = integer_to_list(NSquare)};
 encode_secure_counter_update({decrement, Delta}) ->
-  #'ApbSecureCounterUpdate'{inc = integer_to_list(-Delta)};
-encode_secure_counter_update({decrement, Delta, NSquare}) ->
-  #'ApbSecureCounterUpdate'{inc = integer_to_list(-Delta), nsquare = integer_to_list(NSquare)}.
+  #'ApbSecureCounterUpdate'{inc = integer_to_list(-Delta)}.
 
 decode_secure_counter_update(Update) ->
   #'ApbSecureCounterUpdate'{inc = Delta, nsquare = NSquare} = Update,
@@ -701,8 +700,8 @@ decode_secure_counter_update(Update) ->
     undefined -> {increment, D};
     _ ->
       case string:to_integer(NSquare) of
-        {NSNum, []} -> {increment, D, NSNum};
-        {NSNum, <<>>} -> {increment, D, NSNum};
+        {NSNum, []} -> {increment, {D, NSNum}};
+        {NSNum, <<>>} -> {increment, {D, NSNum}};
         _ -> throw(invalid_securecounter_value)
       end
   end.
