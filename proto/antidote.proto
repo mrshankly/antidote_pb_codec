@@ -43,12 +43,12 @@ message ApbGetCounterResp { required sint32 value = 1; }
 
 // Counter increment request
 message ApbSecureCounterUpdate {
-  required string inc = 1;
-  optional string nsquare = 2;
+  required bytes inc = 1;
+  optional bytes nsquare = 2;
 }
 // Response operation
 message ApbGetSecureCounterResp {
-  required string value = 1;
+  required bytes value = 1;
 }
 
 //------------------

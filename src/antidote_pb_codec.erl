@@ -605,7 +605,7 @@ encode_read_object_resp(mvreg, Val) ->
 encode_read_object_resp(counter, Val) ->
   #'ApbReadObjectResp'{counter = #'ApbGetCounterResp'{value = Val}};
 encode_read_object_resp(securecounter, Val) ->
-  #'ApbReadObjectResp'{securecounter = #'ApbGetSecureCounterResp'{value = integer_to_list(Val)}};
+  #'ApbReadObjectResp'{securecounter = #'ApbGetSecureCounterResp'{value = binary:encode_unsigned(Val)}};
 encode_read_object_resp(set, Val) ->
   #'ApbReadObjectResp'{set = #'ApbGetSetResp'{value = Val}};
 encode_read_object_resp(map, Val) ->
@@ -615,12 +615,8 @@ encode_read_object_resp(flag, Val) ->
 
 decode_read_object_resp(#'ApbReadObjectResp'{counter = #'ApbGetCounterResp'{value = Val}}) ->
   {counter, Val};
-decode_read_object_resp(#'ApbReadObjectResp'{securecounter = #'ApbGetSecureCounterResp'{value = Val}}) ->
-  case string:to_integer(Val) of
-    {Value, []} -> {securecounter, Value};
-    {Value, <<>>} -> {securecounter, Value};
-    _ -> throw(invalid_securecounter_value)
-  end;
+decode_read_object_resp(#'ApbReadObjectResp'{securecounter = #'ApbGetSecureCounterResp'{value = Value}}) ->
+  {securecounter, binary:decode_unsigned(Value)};
 decode_read_object_resp(#'ApbReadObjectResp'{set = #'ApbGetSetResp'{value = Val}}) ->
   {set, Val};
 decode_read_object_resp(#'ApbReadObjectResp'{reg = #'ApbGetRegResp'{value = Val}}) ->
@@ -681,29 +677,18 @@ decode_counter_update(Update) ->
 % secure counter updates
 
 encode_secure_counter_update({increment, {Delta, NSquare}}) ->
-  #'ApbSecureCounterUpdate'{inc = integer_to_list(Delta), nsquare = integer_to_list(NSquare)};
+  #'ApbSecureCounterUpdate'{
+    inc = binary:encode_unsigned(Delta),
+    nsquare = binary:encode_unsigned(NSquare)
+  };
 encode_secure_counter_update({increment, Delta}) ->
-  #'ApbSecureCounterUpdate'{inc = integer_to_list(Delta)};
-encode_secure_counter_update({decrement, {Delta, NSquare}}) ->
-  #'ApbSecureCounterUpdate'{inc = integer_to_list(-Delta), nsquare = integer_to_list(NSquare)};
-encode_secure_counter_update({decrement, Delta}) ->
-  #'ApbSecureCounterUpdate'{inc = integer_to_list(-Delta)}.
+  #'ApbSecureCounterUpdate'{inc = binary:encode_unsigned(Delta)}.
 
 decode_secure_counter_update(Update) ->
   #'ApbSecureCounterUpdate'{inc = Delta, nsquare = NSquare} = Update,
-  D = case string:to_integer(Delta) of
-    {DNum, []} -> DNum;
-    {DNum, <<>>} -> DNum;
-    _ -> throw(invalid_securecounter_value)
-  end,
   case NSquare of
-    undefined -> {increment, D};
-    _ ->
-      case string:to_integer(NSquare) of
-        {NSNum, []} -> {increment, {D, NSNum}};
-        {NSNum, <<>>} -> {increment, {D, NSNum}};
-        _ -> throw(invalid_securecounter_value)
-      end
+    undefined -> {increment, binary:decode_unsigned(Delta)};
+    _ -> {increment, {binary:decode_unsigned(Delta), binary:decode_unsigned(NSquare)}}
   end.
 
 % register updates

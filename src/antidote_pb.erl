@@ -336,13 +336,13 @@ encode_msg_ApbSecureCounterUpdate(#'ApbSecureCounterUpdate'{inc
 				  Bin, TrUserData) ->
     B1 = begin
 	   TrF1 = id(F1, TrUserData),
-	   e_type_string(TrF1, <<Bin/binary, 10>>, TrUserData)
+	   e_type_bytes(TrF1, <<Bin/binary, 10>>, TrUserData)
 	 end,
     if F2 == undefined -> B1;
        true ->
 	   begin
 	     TrF2 = id(F2, TrUserData),
-	     e_type_string(TrF2, <<B1/binary, 18>>, TrUserData)
+	     e_type_bytes(TrF2, <<B1/binary, 18>>, TrUserData)
 	   end
     end.
 
@@ -356,7 +356,7 @@ encode_msg_ApbGetSecureCounterResp(#'ApbGetSecureCounterResp'{value
 				   Bin, TrUserData) ->
     begin
       TrF1 = id(F1, TrUserData),
-      e_type_string(TrF1, <<Bin/binary, 10>>, TrUserData)
+      e_type_bytes(TrF1, <<Bin/binary, 10>>, TrUserData)
     end.
 
 encode_msg_ApbSetUpdate(Msg, TrUserData) ->
@@ -8811,9 +8811,9 @@ v_msg_ApbSecureCounterUpdate(#'ApbSecureCounterUpdate'{inc
 							   = F1,
 						       nsquare = F2},
 			     Path, TrUserData) ->
-    v_type_string(F1, [inc | Path], TrUserData),
+    v_type_bytes(F1, [inc | Path], TrUserData),
     if F2 == undefined -> ok;
-       true -> v_type_string(F2, [nsquare | Path], TrUserData)
+       true -> v_type_bytes(F2, [nsquare | Path], TrUserData)
     end,
     ok;
 v_msg_ApbSecureCounterUpdate(X, Path, _TrUserData) ->
@@ -8825,7 +8825,7 @@ v_msg_ApbSecureCounterUpdate(X, Path, _TrUserData) ->
 v_msg_ApbGetSecureCounterResp(#'ApbGetSecureCounterResp'{value
 							     = F1},
 			      Path, TrUserData) ->
-    v_type_string(F1, [value | Path], TrUserData), ok;
+    v_type_bytes(F1, [value | Path], TrUserData), ok;
 v_msg_ApbGetSecureCounterResp(X, Path, _TrUserData) ->
     mk_type_error({expected_msg, 'ApbGetSecureCounterResp'},
 		  X, Path).
@@ -9662,12 +9662,12 @@ get_msg_defs() ->
       [#field{name = value, fnum = 1, rnum = 2, type = sint32,
 	      occurrence = required, opts = []}]},
      {{msg, 'ApbSecureCounterUpdate'},
-      [#field{name = inc, fnum = 1, rnum = 2, type = string,
+      [#field{name = inc, fnum = 1, rnum = 2, type = bytes,
 	      occurrence = required, opts = []},
-       #field{name = nsquare, fnum = 2, rnum = 3,
-	      type = string, occurrence = optional, opts = []}]},
+       #field{name = nsquare, fnum = 2, rnum = 3, type = bytes,
+	      occurrence = optional, opts = []}]},
      {{msg, 'ApbGetSecureCounterResp'},
-      [#field{name = value, fnum = 1, rnum = 2, type = string,
+      [#field{name = value, fnum = 1, rnum = 2, type = bytes,
 	      occurrence = required, opts = []}]},
      {{msg, 'ApbSetUpdate'},
       [#field{name = optype, fnum = 1, rnum = 2,
@@ -9975,12 +9975,12 @@ find_msg_def('ApbGetCounterResp') ->
     [#field{name = value, fnum = 1, rnum = 2, type = sint32,
 	    occurrence = required, opts = []}];
 find_msg_def('ApbSecureCounterUpdate') ->
-    [#field{name = inc, fnum = 1, rnum = 2, type = string,
+    [#field{name = inc, fnum = 1, rnum = 2, type = bytes,
 	    occurrence = required, opts = []},
-     #field{name = nsquare, fnum = 2, rnum = 3,
-	    type = string, occurrence = optional, opts = []}];
+     #field{name = nsquare, fnum = 2, rnum = 3, type = bytes,
+	    occurrence = optional, opts = []}];
 find_msg_def('ApbGetSecureCounterResp') ->
-    [#field{name = value, fnum = 1, rnum = 2, type = string,
+    [#field{name = value, fnum = 1, rnum = 2, type = bytes,
 	    occurrence = required, opts = []}];
 find_msg_def('ApbSetUpdate') ->
     [#field{name = optype, fnum = 1, rnum = 2,
