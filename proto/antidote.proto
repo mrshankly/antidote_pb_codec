@@ -56,8 +56,13 @@ message ApbGetSecureCounterResp {
 // Secure Bounded Counter
 
 // Counter increment request
-message ApbSecureBoundedCounterUpdate {
+message ApbSecureBoundedCounterInc {
   required bytes inc = 1;
+  optional bytes nsquare = 2;
+}
+// Counter decrement request
+message ApbSecureBoundedCounterDec {
+  required bytes dec = 1;
   optional bytes nsquare = 2;
 }
 // Response operation
@@ -181,7 +186,8 @@ message ApbUpdateOperation { // TODO use this above
   optional ApbCrdtReset resetop = 6;
   optional ApbFlagUpdate flagop = 7;
   optional ApbSecureCounterUpdate securecounterop = 8;
-  optional ApbSecureBoundedCounterUpdate securebcounterop = 9;
+  optional ApbSecureBoundedCounterInc securebcounterinc = 9;
+  optional ApbSecureBoundedCounterDec securebcounterdec = 10;
 }
 
 // Objects to be updated

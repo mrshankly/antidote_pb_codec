@@ -44,10 +44,18 @@
         }).
 -endif.
 
--ifndef('APBSECUREBOUNDEDCOUNTERUPDATE_PB_H').
--define('APBSECUREBOUNDEDCOUNTERUPDATE_PB_H', true).
--record('ApbSecureBoundedCounterUpdate',
+-ifndef('APBSECUREBOUNDEDCOUNTERINC_PB_H').
+-define('APBSECUREBOUNDEDCOUNTERINC_PB_H', true).
+-record('ApbSecureBoundedCounterInc',
         {inc                    :: iodata(),        % = 1
+         nsquare                :: iodata() | undefined % = 2
+        }).
+-endif.
+
+-ifndef('APBSECUREBOUNDEDCOUNTERDEC_PB_H').
+-define('APBSECUREBOUNDEDCOUNTERDEC_PB_H', true).
+-record('ApbSecureBoundedCounterDec',
+        {dec                    :: iodata(),        % = 1
          nsquare                :: iodata() | undefined % = 2
         }).
 -endif.
@@ -210,7 +218,8 @@
          resetop                :: antidote_pb:'ApbCrdtReset'() | undefined, % = 6
          flagop                 :: antidote_pb:'ApbFlagUpdate'() | undefined, % = 7
          securecounterop        :: antidote_pb:'ApbSecureCounterUpdate'() | undefined, % = 8
-         securebcounterop       :: antidote_pb:'ApbSecureBoundedCounterUpdate'() | undefined % = 9
+         securebcounterinc      :: antidote_pb:'ApbSecureBoundedCounterInc'() | undefined, % = 9
+         securebcounterdec      :: antidote_pb:'ApbSecureBoundedCounterDec'() | undefined % = 10
         }).
 -endif.
 
