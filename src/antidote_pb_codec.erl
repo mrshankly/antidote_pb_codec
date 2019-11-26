@@ -548,10 +548,8 @@ encode_update_operation(antidote_crdt_counter_b, Op_Param) ->
   #'ApbUpdateOperation'{counterop = encode_counter_update(Op_Param)};
 encode_update_operation(antidote_crdt_counter_secure, Op_Param) ->
   #'ApbUpdateOperation'{securecounterop = encode_secure_counter_update(Op_Param)};
-encode_update_operation(antidote_crdt_counter_b_secure, {increment, _} = Op_Param) ->
-  #'ApbUpdateOperation'{securebcounterinc = encode_secure_b_counter_update(Op_Param)};
-encode_update_operation(antidote_crdt_counter_b_secure, {decrement, _} = Op_Param) ->
-  #'ApbUpdateOperation'{securebcounterdec = encode_secure_b_counter_update(Op_Param)};
+encode_update_operation(antidote_crdt_counter_b_secure, Op_Param) ->
+  #'ApbUpdateOperation'{securebcounterop = encode_secure_b_counter_update(Op_Param)};
 encode_update_operation(antidote_crdt_set_aw, Op_Param) ->
   #'ApbUpdateOperation'{setop = encode_set_update(Op_Param)};
 encode_update_operation(antidote_crdt_set_rw, Op_Param) ->
@@ -575,9 +573,9 @@ decode_update_operation(#'ApbUpdateOperation'{counterop = Op}) when Op /= undefi
   decode_counter_update(Op);
 decode_update_operation(#'ApbUpdateOperation'{securecounterop = Op}) when Op /= undefined ->
   decode_secure_counter_update(Op);
-decode_update_operation(#'ApbUpdateOperation'{securebcounterinc = Op}) when Op /= undefined ->
+decode_update_operation(#'ApbUpdateOperation'{securebcounterop = Op}) when Op /= undefined ->
   decode_secure_b_counter_update(Op);
-decode_update_operation(#'ApbUpdateOperation'{securebcounterdec = Op}) when Op /= undefined ->
+decode_update_operation(#'ApbUpdateOperation'{securebcounterop = Op}) when Op /= undefined ->
   decode_secure_b_counter_update(Op);
 decode_update_operation(#'ApbUpdateOperation'{setop = Op}) when Op /= undefined ->
   decode_set_update(Op);
@@ -723,30 +721,32 @@ decode_secure_counter_update(Update) ->
 
 % secure bounded counter updates
 
-encode_secure_b_counter_update({increment, {Delta, NSquare, _}}) ->
-  #'ApbSecureBoundedCounterInc'{
+encode_secure_b_counter_update({increment, {Delta, NSquare}}) ->
+  #'ApbSecureBoundedCounterUpdate'{
     inc = binary:encode_unsigned(Delta),
     nsquare = binary:encode_unsigned(NSquare)
   };
-encode_secure_b_counter_update({increment, {Delta, _}}) ->
-  #'ApbSecureBoundedCounterInc'{inc = binary:encode_unsigned(Delta)};
-encode_secure_b_counter_update({decrement, {Delta, NSquare, _}}) ->
-  #'ApbSecureBoundedCounterDec'{
+encode_secure_b_counter_update({increment, Delta}) ->
+  #'ApbSecureBoundedCounterUpdate'{inc = binary:encode_unsigned(Delta)};
+encode_secure_b_counter_update({decrement, {Delta, NSquare}}) ->
+  #'ApbSecureBoundedCounterUpdate'{
     dec = binary:encode_unsigned(Delta),
     nsquare = binary:encode_unsigned(NSquare)
   };
-encode_secure_b_counter_update({decrement, {Delta, _}}) ->
-  #'ApbSecureBoundedCounterDec'{dec = binary:encode_unsigned(Delta)}.
+encode_secure_b_counter_update({decrement, Delta}) ->
+  #'ApbSecureBoundedCounterUpdate'{dec = binary:encode_unsigned(Delta)}.
 
-decode_secure_b_counter_update(#'ApbSecureBoundedCounterInc'{inc = Delta, nsquare = NSquare}) ->
-  case NSquare of
-    undefined -> {increment, {binary:decode_unsigned(Delta), nodeone}};
-    _ -> {increment, {binary:decode_unsigned(Delta), binary:decode_unsigned(NSquare), nodeone}}
-  end;
-decode_secure_b_counter_update(#'ApbSecureBoundedCounterDec'{dec = Delta, nsquare = NSquare}) ->
-  case NSquare of
-    undefined -> {decrement, {binary:decode_unsigned(Delta), nodeone}};
-    _ -> {decrement, {binary:decode_unsigned(Delta), binary:decode_unsigned(NSquare), nodeone}}
+decode_secure_b_counter_update(Update) ->
+  #'ApbSecureBoundedCounterUpdate'{inc = I, dec = D, nsquare = NSquare} = Update,
+  case {I, D, NSquare} of
+    {I, undefined, undefined} when is_integer(I) ->
+      {increment, binary:decode_unsigned(I)};
+    {I, undefined, NSquare} when is_integer(I) and is_integer(NSquare) ->
+      {increment, {binary:decode_unsigned(I), binary:decode_unsigned(NSquare)}};
+    {undefined, D, undefined} when is_integer(D) ->
+      {decrement, binary:decode_unsigned(D)};
+    {undefined, D, NSquare} when is_integer(D) and is_integer(NSquare) ->
+      {decrement, {binary:decode_unsigned(D), binary:decode_unsigned(NSquare)}}
   end.
 
 % register updates
