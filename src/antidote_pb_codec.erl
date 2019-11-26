@@ -44,6 +44,7 @@
 -type read_result_in() ::
   {antidote_crdt_counter_fat, integer()}
 | {antidote_crdt_counter_pn, integer()}
+| {antidote_crdt_counter_b, integer()}
 | {antidote_crdt_counter_secure, integer()}
 | {antidote_crdt_counter_b_secure, {integer(), integer()}}
 | {antidote_crdt_set_aw, [binary()]}
@@ -598,6 +599,8 @@ encode_crdt_type(antidote_crdt_counter_pn) ->
     counter;
 encode_crdt_type(antidote_crdt_counter_fat) ->
     counter;
+encode_crdt_type(antidote_crdt_counter_b) ->
+    counter;
 encode_crdt_type(antidote_crdt_counter_secure) ->
     securecounter;
 encode_crdt_type(antidote_crdt_counter_b_secure) ->
@@ -697,7 +700,8 @@ decode_counter_update(Update) ->
   #'ApbCounterUpdate'{inc = I} = Update,
   case I of
     undefined -> {increment, 1};
-    I -> {increment, I} % negative value for I indicates decrement
+    I when I >= 0 -> {increment, I};
+    I -> {decrement, -I}
   end.
 
 % secure counter updates
