@@ -17,6 +17,7 @@ enum CRDT_type {
   FLAG_DW = 14;
   BCOUNTER = 15;
   SECURECOUNTER = 16;
+  SECUREBCOUNTER = 17;
 }
 
 // Riak Error response
@@ -49,6 +50,20 @@ message ApbSecureCounterUpdate {
 // Response operation
 message ApbGetSecureCounterResp {
   required bytes value = 1;
+}
+
+//------------------
+// Secure Bounded Counter
+
+// Counter increment request
+message ApbSecureBoundedCounterUpdate {
+  required bytes inc = 1;
+  optional bytes nsquare = 2;
+}
+// Response operation
+message ApbGetSecureBoundedCounterResp {
+  required bytes increments = 1;
+  required bytes decrements = 2;
 }
 
 //------------------
@@ -166,6 +181,7 @@ message ApbUpdateOperation { // TODO use this above
   optional ApbCrdtReset resetop = 6;
   optional ApbFlagUpdate flagop = 7;
   optional ApbSecureCounterUpdate securecounterop = 8;
+  optional ApbSecureBoundedCounterUpdate securebcounterop = 9;
 }
 
 // Objects to be updated
@@ -213,6 +229,7 @@ message ApbReadObjectResp {
   optional ApbGetMapResp map = 6;
   optional ApbGetFlagResp flag = 7;
   optional ApbGetSecureCounterResp securecounter = 8;
+  optional ApbGetSecureBoundedCounterResp securebcounter = 9;
 }
 message ApbReadObjectsResp {
   required bool success = 1;
