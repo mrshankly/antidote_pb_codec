@@ -63,8 +63,8 @@ message ApbSecureBoundedCounterUpdate {
 }
 // Response operation
 message ApbGetSecureBoundedCounterResp {
-  required bytes increments = 1;
-  required bytes decrements = 2;
+  optional bytes increments = 1;
+  optional bytes decrements = 2;
 }
 
 //------------------

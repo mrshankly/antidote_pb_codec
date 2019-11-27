@@ -56,8 +56,8 @@
 -ifndef('APBGETSECUREBOUNDEDCOUNTERRESP_PB_H').
 -define('APBGETSECUREBOUNDEDCOUNTERRESP_PB_H', true).
 -record('ApbGetSecureBoundedCounterResp',
-        {increments             :: iodata(),        % = 1
-         decrements             :: iodata()         % = 2
+        {increments             :: iodata() | undefined, % = 1
+         decrements             :: iodata() | undefined % = 2
         }).
 -endif.
 

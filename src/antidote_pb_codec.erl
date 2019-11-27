@@ -624,6 +624,14 @@ encode_read_object_resp(counter, Val) ->
   #'ApbReadObjectResp'{counter = #'ApbGetCounterResp'{value = Val}};
 encode_read_object_resp(securecounter, Val) ->
   #'ApbReadObjectResp'{securecounter = #'ApbGetSecureCounterResp'{value = binary:encode_unsigned(Val)}};
+encode_read_object_resp(securebcounter, {nil, nil}) ->
+  #'ApbReadObjectResp'{securebcounter = #'ApbGetSecureBoundedCounterResp'{}};
+encode_read_object_resp(securebcounter, {Increments, nil}) ->
+  #'ApbReadObjectResp'{
+    securebcounter = #'ApbGetSecureBoundedCounterResp'{
+      increments = binary:encode_unsigned(Increments)
+    }
+  };
 encode_read_object_resp(securebcounter, {Increments, Decrements}) ->
   #'ApbReadObjectResp'{
     securebcounter = #'ApbGetSecureBoundedCounterResp'{
@@ -643,7 +651,14 @@ decode_read_object_resp(#'ApbReadObjectResp'{counter = #'ApbGetCounterResp'{valu
 decode_read_object_resp(#'ApbReadObjectResp'{securecounter = #'ApbGetSecureCounterResp'{value = Value}}) ->
   {securecounter, binary:decode_unsigned(Value)};
 decode_read_object_resp(#'ApbReadObjectResp'{securecounter = #'ApbGetSecureBoundedCounterResp'{increments = I, decrements = D}}) ->
-  {securebcounter, {binary:decode_unsigned(I), binary:decode_unsigned(D)}};
+  case {I, D} of
+    {undefined, undefined} ->
+      {securebcounter, {0, 0}};
+    {_, undefined} ->
+      {securebcounter, {binary:decode_unsigned(I), 0}};
+    _ ->
+      {securebcounter, {binary:decode_unsigned(I), binary:decode_unsigned(D)}}
+  end;
 decode_read_object_resp(#'ApbReadObjectResp'{set = #'ApbGetSetResp'{value = Val}}) ->
   {set, Val};
 decode_read_object_resp(#'ApbReadObjectResp'{reg = #'ApbGetRegResp'{value = Val}}) ->
@@ -739,13 +754,13 @@ encode_secure_b_counter_update({decrement, Delta}) ->
 decode_secure_b_counter_update(Update) ->
   #'ApbSecureBoundedCounterUpdate'{inc = I, dec = D, nsquare = NSquare} = Update,
   case {I, D, NSquare} of
-    {I, undefined, undefined} when is_integer(I) ->
+    {I, undefined, undefined} ->
       {increment, binary:decode_unsigned(I)};
-    {I, undefined, NSquare} when is_integer(I) and is_integer(NSquare) ->
+    {I, undefined, NSquare} ->
       {increment, {binary:decode_unsigned(I), binary:decode_unsigned(NSquare)}};
-    {undefined, D, undefined} when is_integer(D) ->
+    {undefined, D, undefined} ->
       {decrement, binary:decode_unsigned(D)};
-    {undefined, D, NSquare} when is_integer(D) and is_integer(NSquare) ->
+    {undefined, D, NSquare} ->
       {decrement, {binary:decode_unsigned(D), binary:decode_unsigned(NSquare)}}
   end.
 

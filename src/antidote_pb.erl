@@ -421,13 +421,19 @@ encode_msg_ApbGetSecureBoundedCounterResp(#'ApbGetSecureBoundedCounterResp'{incr
 										=
 										F2},
 					  Bin, TrUserData) ->
-    B1 = begin
-	   TrF1 = id(F1, TrUserData),
-	   e_type_bytes(TrF1, <<Bin/binary, 10>>, TrUserData)
+    B1 = if F1 == undefined -> Bin;
+	    true ->
+		begin
+		  TrF1 = id(F1, TrUserData),
+		  e_type_bytes(TrF1, <<Bin/binary, 10>>, TrUserData)
+		end
 	 end,
-    begin
-      TrF2 = id(F2, TrUserData),
-      e_type_bytes(TrF2, <<B1/binary, 18>>, TrUserData)
+    if F2 == undefined -> B1;
+       true ->
+	   begin
+	     TrF2 = id(F2, TrUserData),
+	     e_type_bytes(TrF2, <<B1/binary, 18>>, TrUserData)
+	   end
     end.
 
 encode_msg_ApbSetUpdate(Msg, TrUserData) ->
@@ -8686,7 +8692,12 @@ merge_msg_ApbSecureBoundedCounterUpdate(#'ApbSecureBoundedCounterUpdate'{inc
 					 end}.
 
 -compile({nowarn_unused_function,merge_msg_ApbGetSecureBoundedCounterResp/3}).
-merge_msg_ApbGetSecureBoundedCounterResp(#'ApbGetSecureBoundedCounterResp'{},
+merge_msg_ApbGetSecureBoundedCounterResp(#'ApbGetSecureBoundedCounterResp'{increments
+									       =
+									       PFincrements,
+									   decrements
+									       =
+									       PFdecrements},
 					 #'ApbGetSecureBoundedCounterResp'{increments
 									       =
 									       NFincrements,
@@ -8695,8 +8706,15 @@ merge_msg_ApbGetSecureBoundedCounterResp(#'ApbGetSecureBoundedCounterResp'{},
 									       NFdecrements},
 					 _) ->
     #'ApbGetSecureBoundedCounterResp'{increments =
-					  NFincrements,
-				      decrements = NFdecrements}.
+					  if NFincrements =:= undefined ->
+						 PFincrements;
+					     true -> NFincrements
+					  end,
+				      decrements =
+					  if NFdecrements =:= undefined ->
+						 PFdecrements;
+					     true -> NFdecrements
+					  end}.
 
 -compile({nowarn_unused_function,merge_msg_ApbSetUpdate/3}).
 merge_msg_ApbSetUpdate(#'ApbSetUpdate'{adds = PFadds,
@@ -9558,8 +9576,14 @@ v_msg_ApbGetSecureBoundedCounterResp(#'ApbGetSecureBoundedCounterResp'{increment
 									   =
 									   F2},
 				     Path, TrUserData) ->
-    v_type_bytes(F1, [increments | Path], TrUserData),
-    v_type_bytes(F2, [decrements | Path], TrUserData),
+    if F1 == undefined -> ok;
+       true ->
+	   v_type_bytes(F1, [increments | Path], TrUserData)
+    end,
+    if F2 == undefined -> ok;
+       true ->
+	   v_type_bytes(F2, [decrements | Path], TrUserData)
+    end,
     ok;
 v_msg_ApbGetSecureBoundedCounterResp(X, Path,
 				     _TrUserData) ->
@@ -10433,9 +10457,9 @@ get_msg_defs() ->
 	      occurrence = optional, opts = []}]},
      {{msg, 'ApbGetSecureBoundedCounterResp'},
       [#field{name = increments, fnum = 1, rnum = 2,
-	      type = bytes, occurrence = required, opts = []},
+	      type = bytes, occurrence = optional, opts = []},
        #field{name = decrements, fnum = 2, rnum = 3,
-	      type = bytes, occurrence = required, opts = []}]},
+	      type = bytes, occurrence = optional, opts = []}]},
      {{msg, 'ApbSetUpdate'},
       [#field{name = optype, fnum = 1, rnum = 2,
 	      type = {enum, 'ApbSetUpdate.SetOpType'},
@@ -10768,9 +10792,9 @@ find_msg_def('ApbSecureBoundedCounterUpdate') ->
 	    occurrence = optional, opts = []}];
 find_msg_def('ApbGetSecureBoundedCounterResp') ->
     [#field{name = increments, fnum = 1, rnum = 2,
-	    type = bytes, occurrence = required, opts = []},
+	    type = bytes, occurrence = optional, opts = []},
      #field{name = decrements, fnum = 2, rnum = 3,
-	    type = bytes, occurrence = required, opts = []}];
+	    type = bytes, occurrence = optional, opts = []}];
 find_msg_def('ApbSetUpdate') ->
     [#field{name = optype, fnum = 1, rnum = 2,
 	    type = {enum, 'ApbSetUpdate.SetOpType'},
