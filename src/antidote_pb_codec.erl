@@ -549,9 +549,9 @@ encode_update_operation(antidote_crdt_counter_fat, Op_Param) ->
 encode_update_operation(antidote_crdt_counter_b, Op_Param) ->
   #'ApbUpdateOperation'{counterop = encode_counter_update(Op_Param)};
 encode_update_operation(antidote_crdt_counter_secure, Op_Param) ->
-  #'ApbUpdateOperation'{securecounterop = encode_secure_counter_update(Op_Param)};
+  #'ApbUpdateOperation'{secure_counterop = encode_secure_counter_update(Op_Param)};
 encode_update_operation(antidote_crdt_counter_b_secure, Op_Param) ->
-  #'ApbUpdateOperation'{securebcounterop = encode_secure_b_counter_update(Op_Param)};
+  #'ApbUpdateOperation'{secure_bcounterop = encode_secure_b_counter_update(Op_Param)};
 encode_update_operation(antidote_crdt_set_aw, Op_Param) ->
   #'ApbUpdateOperation'{setop = encode_set_update(Op_Param)};
 encode_update_operation(antidote_crdt_set_rw, Op_Param) ->
@@ -573,11 +573,11 @@ encode_update_operation(Type, _Op) ->
 
 decode_update_operation(#'ApbUpdateOperation'{counterop = Op}) when Op /= undefined ->
   decode_counter_update(Op);
-decode_update_operation(#'ApbUpdateOperation'{securecounterop = Op}) when Op /= undefined ->
+decode_update_operation(#'ApbUpdateOperation'{secure_counterop = Op}) when Op /= undefined ->
   decode_secure_counter_update(Op);
-decode_update_operation(#'ApbUpdateOperation'{securebcounterop = Op}) when Op /= undefined ->
+decode_update_operation(#'ApbUpdateOperation'{secure_bcounterop = Op}) when Op /= undefined ->
   decode_secure_b_counter_update(Op);
-decode_update_operation(#'ApbUpdateOperation'{securebcounterop = Op}) when Op /= undefined ->
+decode_update_operation(#'ApbUpdateOperation'{secure_bcounterop = Op}) when Op /= undefined ->
   decode_secure_b_counter_update(Op);
 decode_update_operation(#'ApbUpdateOperation'{setop = Op}) when Op /= undefined ->
   decode_set_update(Op);
@@ -602,9 +602,9 @@ encode_crdt_type(antidote_crdt_counter_fat) ->
 encode_crdt_type(antidote_crdt_counter_b) ->
     counter;
 encode_crdt_type(antidote_crdt_counter_secure) ->
-    securecounter;
+    secure_counter;
 encode_crdt_type(antidote_crdt_counter_b_secure) ->
-    securebcounter;
+    secure_bcounter;
 encode_crdt_type(antidote_crdt_set_aw) ->
     set;
 encode_crdt_type(antidote_crdt_set_rw) ->
@@ -624,19 +624,19 @@ encode_read_object_resp(mvreg, Val) ->
   #'ApbReadObjectResp'{mvreg = #'ApbGetMVRegResp'{values = Val}};
 encode_read_object_resp(counter, Val) ->
   #'ApbReadObjectResp'{counter = #'ApbGetCounterResp'{value = Val}};
-encode_read_object_resp(securecounter, Val) ->
-  #'ApbReadObjectResp'{securecounter = #'ApbGetSecureCounterResp'{value = binary:encode_unsigned(Val)}};
-encode_read_object_resp(securebcounter, {nil, nil}) ->
-  #'ApbReadObjectResp'{securebcounter = #'ApbGetSecureBoundedCounterResp'{}};
-encode_read_object_resp(securebcounter, {Increments, nil}) ->
+encode_read_object_resp(secure_counter, Val) ->
+  #'ApbReadObjectResp'{secure_counter = #'ApbGetSecureCounterResp'{value = binary:encode_unsigned(Val)}};
+encode_read_object_resp(secure_bcounter, {nil, nil}) ->
+  #'ApbReadObjectResp'{secure_bcounter = #'ApbGetSecureBoundedCounterResp'{}};
+encode_read_object_resp(secure_bcounter, {Increments, nil}) ->
   #'ApbReadObjectResp'{
-    securebcounter = #'ApbGetSecureBoundedCounterResp'{
+    secure_bcounter = #'ApbGetSecureBoundedCounterResp'{
       increments = binary:encode_unsigned(Increments)
     }
   };
-encode_read_object_resp(securebcounter, {Increments, Decrements}) ->
+encode_read_object_resp(secure_bcounter, {Increments, Decrements}) ->
   #'ApbReadObjectResp'{
-    securebcounter = #'ApbGetSecureBoundedCounterResp'{
+    secure_bcounter = #'ApbGetSecureBoundedCounterResp'{
       increments = binary:encode_unsigned(Increments),
       decrements = binary:encode_unsigned(Decrements)
     }
@@ -650,16 +650,16 @@ encode_read_object_resp(flag, Val) ->
 
 decode_read_object_resp(#'ApbReadObjectResp'{counter = #'ApbGetCounterResp'{value = Val}}) ->
   {counter, Val};
-decode_read_object_resp(#'ApbReadObjectResp'{securecounter = #'ApbGetSecureCounterResp'{value = Value}}) ->
-  {securecounter, binary:decode_unsigned(Value)};
-decode_read_object_resp(#'ApbReadObjectResp'{securecounter = #'ApbGetSecureBoundedCounterResp'{increments = I, decrements = D}}) ->
+decode_read_object_resp(#'ApbReadObjectResp'{secure_counter = #'ApbGetSecureCounterResp'{value = Value}}) ->
+  {secure_counter, binary:decode_unsigned(Value)};
+decode_read_object_resp(#'ApbReadObjectResp'{secure_counter = #'ApbGetSecureBoundedCounterResp'{increments = I, decrements = D}}) ->
   case {I, D} of
     {undefined, undefined} ->
-      {securebcounter, {0, 0}};
+      {secure_bcounter, {0, 0}};
     {_, undefined} ->
-      {securebcounter, {binary:decode_unsigned(I), 0}};
+      {secure_bcounter, {binary:decode_unsigned(I), 0}};
     _ ->
-      {securebcounter, {binary:decode_unsigned(I), binary:decode_unsigned(D)}}
+      {secure_bcounter, {binary:decode_unsigned(I), binary:decode_unsigned(D)}}
   end;
 decode_read_object_resp(#'ApbReadObjectResp'{set = #'ApbGetSetResp'{value = Val}}) ->
   {set, Val};

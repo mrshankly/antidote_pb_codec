@@ -5,6 +5,7 @@ option java_package = "com.basho.riak.protobuf";
 option java_outer_classname = "AntidotePB";
 
 enum CRDT_type {
+  // Regular CRDTs
   COUNTER = 3;
   ORSET = 4;
   LWWREG = 5;
@@ -16,8 +17,10 @@ enum CRDT_type {
   FLAG_EW = 13;
   FLAG_DW = 14;
   BCOUNTER = 15;
-  SECURECOUNTER = 16;
-  SECUREBCOUNTER = 17;
+
+  // Secure CRDTs
+  SECURE_COUNTER = 16;
+  SECURE_BCOUNTER = 17;
 }
 
 // Riak Error response
@@ -47,6 +50,7 @@ message ApbSecureCounterUpdate {
   required bytes inc = 1;
   optional bytes nsquare = 2;
 }
+
 // Response operation
 message ApbGetSecureCounterResp {
   required bytes value = 1;
@@ -61,6 +65,7 @@ message ApbSecureBoundedCounterUpdate {
   optional bytes dec = 2;
   optional bytes nsquare = 3;
 }
+
 // Response operation
 message ApbGetSecureBoundedCounterResp {
   optional bytes increments = 1;
@@ -181,8 +186,8 @@ message ApbUpdateOperation { // TODO use this above
   optional ApbMapUpdate mapop = 5;
   optional ApbCrdtReset resetop = 6;
   optional ApbFlagUpdate flagop = 7;
-  optional ApbSecureCounterUpdate securecounterop = 8;
-  optional ApbSecureBoundedCounterUpdate securebcounterop = 9;
+  optional ApbSecureCounterUpdate secure_counterop = 8;
+  optional ApbSecureBoundedCounterUpdate secure_bcounterop = 9;
 }
 
 // Objects to be updated
@@ -229,8 +234,8 @@ message ApbReadObjectResp {
   optional ApbGetMVRegResp mvreg = 4;
   optional ApbGetMapResp map = 6;
   optional ApbGetFlagResp flag = 7;
-  optional ApbGetSecureCounterResp securecounter = 8;
-  optional ApbGetSecureBoundedCounterResp securebcounter = 9;
+  optional ApbGetSecureCounterResp secure_counter = 8;
+  optional ApbGetSecureBoundedCounterResp secure_bcounter = 9;
 }
 message ApbReadObjectsResp {
   required bool success = 1;

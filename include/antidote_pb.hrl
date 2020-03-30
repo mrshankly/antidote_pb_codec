@@ -102,7 +102,7 @@
 -define('APBMAPKEY_PB_H', true).
 -record('ApbMapKey',
         {key                    :: iodata(),        % = 1
-         type                   :: 'COUNTER' | 'ORSET' | 'LWWREG' | 'MVREG' | 'GMAP' | 'RWSET' | 'RRMAP' | 'FATCOUNTER' | 'FLAG_EW' | 'FLAG_DW' | 'BCOUNTER' | 'SECURECOUNTER' | 'SECUREBCOUNTER' | integer() % = 2, enum CRDT_type
+         type                   :: 'COUNTER' | 'ORSET' | 'LWWREG' | 'MVREG' | 'GMAP' | 'RWSET' | 'RRMAP' | 'FATCOUNTER' | 'FLAG_EW' | 'FLAG_DW' | 'BCOUNTER' | 'SECURE_COUNTER' | 'SECURE_BCOUNTER' | integer() % = 2, enum CRDT_type
         }).
 -endif.
 
@@ -180,7 +180,7 @@
 -define('APBBOUNDOBJECT_PB_H', true).
 -record('ApbBoundObject',
         {key                    :: iodata(),        % = 1
-         type                   :: 'COUNTER' | 'ORSET' | 'LWWREG' | 'MVREG' | 'GMAP' | 'RWSET' | 'RRMAP' | 'FATCOUNTER' | 'FLAG_EW' | 'FLAG_DW' | 'BCOUNTER' | 'SECURECOUNTER' | 'SECUREBCOUNTER' | integer(), % = 2, enum CRDT_type
+         type                   :: 'COUNTER' | 'ORSET' | 'LWWREG' | 'MVREG' | 'GMAP' | 'RWSET' | 'RRMAP' | 'FATCOUNTER' | 'FLAG_EW' | 'FLAG_DW' | 'BCOUNTER' | 'SECURE_COUNTER' | 'SECURE_BCOUNTER' | integer(), % = 2, enum CRDT_type
          bucket                 :: iodata()         % = 3
         }).
 -endif.
@@ -210,8 +210,8 @@
          mapop                  :: antidote_pb:'ApbMapUpdate'() | undefined, % = 5
          resetop                :: antidote_pb:'ApbCrdtReset'() | undefined, % = 6
          flagop                 :: antidote_pb:'ApbFlagUpdate'() | undefined, % = 7
-         securecounterop        :: antidote_pb:'ApbSecureCounterUpdate'() | undefined, % = 8
-         securebcounterop       :: antidote_pb:'ApbSecureBoundedCounterUpdate'() | undefined % = 9
+         secure_counterop       :: antidote_pb:'ApbSecureCounterUpdate'() | undefined, % = 8
+         secure_bcounterop      :: antidote_pb:'ApbSecureBoundedCounterUpdate'() | undefined % = 9
         }).
 -endif.
 
@@ -279,8 +279,8 @@
          mvreg                  :: antidote_pb:'ApbGetMVRegResp'() | undefined, % = 4
          map                    :: antidote_pb:'ApbGetMapResp'() | undefined, % = 6
          flag                   :: antidote_pb:'ApbGetFlagResp'() | undefined, % = 7
-         securecounter          :: antidote_pb:'ApbGetSecureCounterResp'() | undefined, % = 8
-         securebcounter         :: antidote_pb:'ApbGetSecureBoundedCounterResp'() | undefined % = 9
+         secure_counter         :: antidote_pb:'ApbGetSecureCounterResp'() | undefined, % = 8
+         secure_bcounter        :: antidote_pb:'ApbGetSecureBoundedCounterResp'() | undefined % = 9
         }).
 -endif.
 

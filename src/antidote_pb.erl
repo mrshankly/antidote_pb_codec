@@ -50,7 +50,7 @@
 -include("gpb.hrl").
 
 %% enumerated types
--type 'CRDT_type'() :: 'COUNTER' | 'ORSET' | 'LWWREG' | 'MVREG' | 'GMAP' | 'RWSET' | 'RRMAP' | 'FATCOUNTER' | 'FLAG_EW' | 'FLAG_DW' | 'BCOUNTER' | 'SECURECOUNTER' | 'SECUREBCOUNTER'.
+-type 'CRDT_type'() :: 'COUNTER' | 'ORSET' | 'LWWREG' | 'MVREG' | 'GMAP' | 'RWSET' | 'RRMAP' | 'FATCOUNTER' | 'FLAG_EW' | 'FLAG_DW' | 'BCOUNTER' | 'SECURE_COUNTER' | 'SECURE_BCOUNTER'.
 -type 'ApbSetUpdate.SetOpType'() :: 'ADD' | 'REMOVE'.
 -export_type(['CRDT_type'/0, 'ApbSetUpdate.SetOpType'/0]).
 
@@ -753,8 +753,8 @@ encode_msg_ApbUpdateOperation(#'ApbUpdateOperation'{counterop
 						    setop = F2, regop = F3,
 						    mapop = F4, resetop = F5,
 						    flagop = F6,
-						    securecounterop = F7,
-						    securebcounterop = F8},
+						    secure_counterop = F7,
+						    secure_bcounterop = F8},
 			      Bin, TrUserData) ->
     B1 = if F1 == undefined -> Bin;
 	    true ->
@@ -814,18 +814,19 @@ encode_msg_ApbUpdateOperation(#'ApbUpdateOperation'{counterop
 	    true ->
 		begin
 		  TrF7 = id(F7, TrUserData),
-		  e_mfield_ApbUpdateOperation_securecounterop(TrF7,
-							      <<B6/binary, 66>>,
-							      TrUserData)
+		  e_mfield_ApbUpdateOperation_secure_counterop(TrF7,
+							       <<B6/binary,
+								 66>>,
+							       TrUserData)
 		end
 	 end,
     if F8 == undefined -> B7;
        true ->
 	   begin
 	     TrF8 = id(F8, TrUserData),
-	     e_mfield_ApbUpdateOperation_securebcounterop(TrF8,
-							  <<B7/binary, 74>>,
-							  TrUserData)
+	     e_mfield_ApbUpdateOperation_secure_bcounterop(TrF8,
+							   <<B7/binary, 74>>,
+							   TrUserData)
 	   end
     end.
 
@@ -983,8 +984,9 @@ encode_msg_ApbReadObjectResp(#'ApbReadObjectResp'{counter
 						      = F1,
 						  set = F2, reg = F3,
 						  mvreg = F4, map = F5,
-						  flag = F6, securecounter = F7,
-						  securebcounter = F8},
+						  flag = F6,
+						  secure_counter = F7,
+						  secure_bcounter = F8},
 			     Bin, TrUserData) ->
     B1 = if F1 == undefined -> Bin;
 	    true ->
@@ -1040,18 +1042,18 @@ encode_msg_ApbReadObjectResp(#'ApbReadObjectResp'{counter
 	    true ->
 		begin
 		  TrF7 = id(F7, TrUserData),
-		  e_mfield_ApbReadObjectResp_securecounter(TrF7,
-							   <<B6/binary, 66>>,
-							   TrUserData)
+		  e_mfield_ApbReadObjectResp_secure_counter(TrF7,
+							    <<B6/binary, 66>>,
+							    TrUserData)
 		end
 	 end,
     if F8 == undefined -> B7;
        true ->
 	   begin
 	     TrF8 = id(F8, TrUserData),
-	     e_mfield_ApbReadObjectResp_securebcounter(TrF8,
-						       <<B7/binary, 74>>,
-						       TrUserData)
+	     e_mfield_ApbReadObjectResp_secure_bcounter(TrF8,
+							<<B7/binary, 74>>,
+							TrUserData)
 	   end
     end.
 
@@ -1434,15 +1436,15 @@ e_mfield_ApbUpdateOperation_flagop(Msg, Bin,
     Bin2 = <<Bin/binary, 2>>,
     encode_msg_ApbFlagUpdate(Msg, Bin2, TrUserData).
 
-e_mfield_ApbUpdateOperation_securecounterop(Msg, Bin,
-					    TrUserData) ->
+e_mfield_ApbUpdateOperation_secure_counterop(Msg, Bin,
+					     TrUserData) ->
     SubBin = encode_msg_ApbSecureCounterUpdate(Msg, <<>>,
 					       TrUserData),
     Bin2 = e_varint(byte_size(SubBin), Bin),
     <<Bin2/binary, SubBin/binary>>.
 
-e_mfield_ApbUpdateOperation_securebcounterop(Msg, Bin,
-					     TrUserData) ->
+e_mfield_ApbUpdateOperation_secure_bcounterop(Msg, Bin,
+					      TrUserData) ->
     SubBin = encode_msg_ApbSecureBoundedCounterUpdate(Msg,
 						      <<>>, TrUserData),
     Bin2 = e_varint(byte_size(SubBin), Bin),
@@ -1560,15 +1562,15 @@ e_mfield_ApbReadObjectResp_flag(Msg, Bin, TrUserData) ->
     Bin2 = <<Bin/binary, 2>>,
     encode_msg_ApbGetFlagResp(Msg, Bin2, TrUserData).
 
-e_mfield_ApbReadObjectResp_securecounter(Msg, Bin,
-					 TrUserData) ->
+e_mfield_ApbReadObjectResp_secure_counter(Msg, Bin,
+					  TrUserData) ->
     SubBin = encode_msg_ApbGetSecureCounterResp(Msg, <<>>,
 						TrUserData),
     Bin2 = e_varint(byte_size(SubBin), Bin),
     <<Bin2/binary, SubBin/binary>>.
 
-e_mfield_ApbReadObjectResp_securebcounter(Msg, Bin,
-					  TrUserData) ->
+e_mfield_ApbReadObjectResp_secure_bcounter(Msg, Bin,
+					   TrUserData) ->
     SubBin = encode_msg_ApbGetSecureBoundedCounterResp(Msg,
 						       <<>>, TrUserData),
     Bin2 = e_varint(byte_size(SubBin), Bin),
@@ -1648,9 +1650,9 @@ e_enum_CRDT_type('FLAG_DW', Bin, _TrUserData) ->
     <<Bin/binary, 14>>;
 e_enum_CRDT_type('BCOUNTER', Bin, _TrUserData) ->
     <<Bin/binary, 15>>;
-e_enum_CRDT_type('SECURECOUNTER', Bin, _TrUserData) ->
+e_enum_CRDT_type('SECURE_COUNTER', Bin, _TrUserData) ->
     <<Bin/binary, 16>>;
-e_enum_CRDT_type('SECUREBCOUNTER', Bin, _TrUserData) ->
+e_enum_CRDT_type('SECURE_BCOUNTER', Bin, _TrUserData) ->
     <<Bin/binary, 17>>;
 e_enum_CRDT_type(V, Bin, _TrUserData) ->
     e_varint(V, Bin).
@@ -5289,24 +5291,25 @@ dfp_read_field_def_ApbUpdateOperation(<<66,
 					Rest/binary>>,
 				      Z1, Z2, F@_1, F@_2, F@_3, F@_4, F@_5,
 				      F@_6, F@_7, F@_8, TrUserData) ->
-    d_field_ApbUpdateOperation_securecounterop(Rest, Z1, Z2,
-					       F@_1, F@_2, F@_3, F@_4, F@_5,
-					       F@_6, F@_7, F@_8, TrUserData);
+    d_field_ApbUpdateOperation_secure_counterop(Rest, Z1,
+						Z2, F@_1, F@_2, F@_3, F@_4,
+						F@_5, F@_6, F@_7, F@_8,
+						TrUserData);
 dfp_read_field_def_ApbUpdateOperation(<<74,
 					Rest/binary>>,
 				      Z1, Z2, F@_1, F@_2, F@_3, F@_4, F@_5,
 				      F@_6, F@_7, F@_8, TrUserData) ->
-    d_field_ApbUpdateOperation_securebcounterop(Rest, Z1,
-						Z2, F@_1, F@_2, F@_3, F@_4,
-						F@_5, F@_6, F@_7, F@_8,
-						TrUserData);
+    d_field_ApbUpdateOperation_secure_bcounterop(Rest, Z1,
+						 Z2, F@_1, F@_2, F@_3, F@_4,
+						 F@_5, F@_6, F@_7, F@_8,
+						 TrUserData);
 dfp_read_field_def_ApbUpdateOperation(<<>>, 0, 0, F@_1,
 				      F@_2, F@_3, F@_4, F@_5, F@_6, F@_7, F@_8,
 				      _) ->
     #'ApbUpdateOperation'{counterop = F@_1, setop = F@_2,
 			  regop = F@_3, mapop = F@_4, resetop = F@_5,
-			  flagop = F@_6, securecounterop = F@_7,
-			  securebcounterop = F@_8};
+			  flagop = F@_6, secure_counterop = F@_7,
+			  secure_bcounterop = F@_8};
 dfp_read_field_def_ApbUpdateOperation(Other, Z1, Z2,
 				      F@_1, F@_2, F@_3, F@_4, F@_5, F@_6, F@_7,
 				      F@_8, TrUserData) ->
@@ -5353,15 +5356,15 @@ dg_read_field_def_ApbUpdateOperation(<<0:1, X:7,
 					    F@_2, F@_3, F@_4, F@_5, F@_6, F@_7,
 					    F@_8, TrUserData);
       66 ->
-	  d_field_ApbUpdateOperation_securecounterop(Rest, 0, 0,
-						     F@_1, F@_2, F@_3, F@_4,
-						     F@_5, F@_6, F@_7, F@_8,
-						     TrUserData);
-      74 ->
-	  d_field_ApbUpdateOperation_securebcounterop(Rest, 0, 0,
+	  d_field_ApbUpdateOperation_secure_counterop(Rest, 0, 0,
 						      F@_1, F@_2, F@_3, F@_4,
 						      F@_5, F@_6, F@_7, F@_8,
 						      TrUserData);
+      74 ->
+	  d_field_ApbUpdateOperation_secure_bcounterop(Rest, 0, 0,
+						       F@_1, F@_2, F@_3, F@_4,
+						       F@_5, F@_6, F@_7, F@_8,
+						       TrUserData);
       _ ->
 	  case Key band 7 of
 	    0 ->
@@ -5392,8 +5395,8 @@ dg_read_field_def_ApbUpdateOperation(<<>>, 0, 0, F@_1,
 				     _) ->
     #'ApbUpdateOperation'{counterop = F@_1, setop = F@_2,
 			  regop = F@_3, mapop = F@_4, resetop = F@_5,
-			  flagop = F@_6, securecounterop = F@_7,
-			  securebcounterop = F@_8}.
+			  flagop = F@_6, secure_counterop = F@_7,
+			  secure_bcounterop = F@_8}.
 
 d_field_ApbUpdateOperation_counterop(<<1:1, X:7,
 				       Rest/binary>>,
@@ -5570,19 +5573,20 @@ d_field_ApbUpdateOperation_flagop(<<0:1, X:7,
 					  end,
 					  F@_7, F@_8, TrUserData).
 
-d_field_ApbUpdateOperation_securecounterop(<<1:1, X:7,
-					     Rest/binary>>,
-					   N, Acc, F@_1, F@_2, F@_3, F@_4, F@_5,
-					   F@_6, F@_7, F@_8, TrUserData)
+d_field_ApbUpdateOperation_secure_counterop(<<1:1, X:7,
+					      Rest/binary>>,
+					    N, Acc, F@_1, F@_2, F@_3, F@_4,
+					    F@_5, F@_6, F@_7, F@_8, TrUserData)
     when N < 57 ->
-    d_field_ApbUpdateOperation_securecounterop(Rest, N + 7,
-					       X bsl N + Acc, F@_1, F@_2, F@_3,
-					       F@_4, F@_5, F@_6, F@_7, F@_8,
-					       TrUserData);
-d_field_ApbUpdateOperation_securecounterop(<<0:1, X:7,
-					     Rest/binary>>,
-					   N, Acc, F@_1, F@_2, F@_3, F@_4, F@_5,
-					   F@_6, Prev, F@_8, TrUserData) ->
+    d_field_ApbUpdateOperation_secure_counterop(Rest, N + 7,
+						X bsl N + Acc, F@_1, F@_2, F@_3,
+						F@_4, F@_5, F@_6, F@_7, F@_8,
+						TrUserData);
+d_field_ApbUpdateOperation_secure_counterop(<<0:1, X:7,
+					      Rest/binary>>,
+					    N, Acc, F@_1, F@_2, F@_3, F@_4,
+					    F@_5, F@_6, Prev, F@_8,
+					    TrUserData) ->
     {NewFValue, RestF} = begin
 			   Len = X bsl N + Acc,
 			   <<Bs:Len/binary, Rest2/binary>> = Rest,
@@ -5601,20 +5605,20 @@ d_field_ApbUpdateOperation_securecounterop(<<0:1, X:7,
 					  end,
 					  F@_8, TrUserData).
 
-d_field_ApbUpdateOperation_securebcounterop(<<1:1, X:7,
-					      Rest/binary>>,
-					    N, Acc, F@_1, F@_2, F@_3, F@_4,
-					    F@_5, F@_6, F@_7, F@_8, TrUserData)
+d_field_ApbUpdateOperation_secure_bcounterop(<<1:1, X:7,
+					       Rest/binary>>,
+					     N, Acc, F@_1, F@_2, F@_3, F@_4,
+					     F@_5, F@_6, F@_7, F@_8, TrUserData)
     when N < 57 ->
-    d_field_ApbUpdateOperation_securebcounterop(Rest, N + 7,
-						X bsl N + Acc, F@_1, F@_2, F@_3,
-						F@_4, F@_5, F@_6, F@_7, F@_8,
-						TrUserData);
-d_field_ApbUpdateOperation_securebcounterop(<<0:1, X:7,
-					      Rest/binary>>,
-					    N, Acc, F@_1, F@_2, F@_3, F@_4,
-					    F@_5, F@_6, F@_7, Prev,
-					    TrUserData) ->
+    d_field_ApbUpdateOperation_secure_bcounterop(Rest,
+						 N + 7, X bsl N + Acc, F@_1,
+						 F@_2, F@_3, F@_4, F@_5, F@_6,
+						 F@_7, F@_8, TrUserData);
+d_field_ApbUpdateOperation_secure_bcounterop(<<0:1, X:7,
+					       Rest/binary>>,
+					     N, Acc, F@_1, F@_2, F@_3, F@_4,
+					     F@_5, F@_6, F@_7, Prev,
+					     TrUserData) ->
     {NewFValue, RestF} = begin
 			   Len = X bsl N + Acc,
 			   <<Bs:Len/binary, Rest2/binary>> = Rest,
@@ -6775,22 +6779,22 @@ dfp_read_field_def_ApbReadObjectResp(<<66,
 				       Rest/binary>>,
 				     Z1, Z2, F@_1, F@_2, F@_3, F@_4, F@_5, F@_6,
 				     F@_7, F@_8, TrUserData) ->
-    d_field_ApbReadObjectResp_securecounter(Rest, Z1, Z2,
-					    F@_1, F@_2, F@_3, F@_4, F@_5, F@_6,
-					    F@_7, F@_8, TrUserData);
+    d_field_ApbReadObjectResp_secure_counter(Rest, Z1, Z2,
+					     F@_1, F@_2, F@_3, F@_4, F@_5, F@_6,
+					     F@_7, F@_8, TrUserData);
 dfp_read_field_def_ApbReadObjectResp(<<74,
 				       Rest/binary>>,
 				     Z1, Z2, F@_1, F@_2, F@_3, F@_4, F@_5, F@_6,
 				     F@_7, F@_8, TrUserData) ->
-    d_field_ApbReadObjectResp_securebcounter(Rest, Z1, Z2,
-					     F@_1, F@_2, F@_3, F@_4, F@_5, F@_6,
-					     F@_7, F@_8, TrUserData);
+    d_field_ApbReadObjectResp_secure_bcounter(Rest, Z1, Z2,
+					      F@_1, F@_2, F@_3, F@_4, F@_5,
+					      F@_6, F@_7, F@_8, TrUserData);
 dfp_read_field_def_ApbReadObjectResp(<<>>, 0, 0, F@_1,
 				     F@_2, F@_3, F@_4, F@_5, F@_6, F@_7, F@_8,
 				     _) ->
     #'ApbReadObjectResp'{counter = F@_1, set = F@_2,
 			 reg = F@_3, mvreg = F@_4, map = F@_5, flag = F@_6,
-			 securecounter = F@_7, securebcounter = F@_8};
+			 secure_counter = F@_7, secure_bcounter = F@_8};
 dfp_read_field_def_ApbReadObjectResp(Other, Z1, Z2,
 				     F@_1, F@_2, F@_3, F@_4, F@_5, F@_6, F@_7,
 				     F@_8, TrUserData) ->
@@ -6837,14 +6841,15 @@ dg_read_field_def_ApbReadObjectResp(<<0:1, X:7,
 					 F@_3, F@_4, F@_5, F@_6, F@_7, F@_8,
 					 TrUserData);
       66 ->
-	  d_field_ApbReadObjectResp_securecounter(Rest, 0, 0,
-						  F@_1, F@_2, F@_3, F@_4, F@_5,
-						  F@_6, F@_7, F@_8, TrUserData);
-      74 ->
-	  d_field_ApbReadObjectResp_securebcounter(Rest, 0, 0,
+	  d_field_ApbReadObjectResp_secure_counter(Rest, 0, 0,
 						   F@_1, F@_2, F@_3, F@_4, F@_5,
 						   F@_6, F@_7, F@_8,
 						   TrUserData);
+      74 ->
+	  d_field_ApbReadObjectResp_secure_bcounter(Rest, 0, 0,
+						    F@_1, F@_2, F@_3, F@_4,
+						    F@_5, F@_6, F@_7, F@_8,
+						    TrUserData);
       _ ->
 	  case Key band 7 of
 	    0 ->
@@ -6875,7 +6880,7 @@ dg_read_field_def_ApbReadObjectResp(<<>>, 0, 0, F@_1,
 				    _) ->
     #'ApbReadObjectResp'{counter = F@_1, set = F@_2,
 			 reg = F@_3, mvreg = F@_4, map = F@_5, flag = F@_6,
-			 securecounter = F@_7, securebcounter = F@_8}.
+			 secure_counter = F@_7, secure_bcounter = F@_8}.
 
 d_field_ApbReadObjectResp_counter(<<1:1, X:7,
 				    Rest/binary>>,
@@ -7046,19 +7051,19 @@ d_field_ApbReadObjectResp_flag(<<0:1, X:7,
 					 end,
 					 F@_7, F@_8, TrUserData).
 
-d_field_ApbReadObjectResp_securecounter(<<1:1, X:7,
-					  Rest/binary>>,
-					N, Acc, F@_1, F@_2, F@_3, F@_4, F@_5,
-					F@_6, F@_7, F@_8, TrUserData)
+d_field_ApbReadObjectResp_secure_counter(<<1:1, X:7,
+					   Rest/binary>>,
+					 N, Acc, F@_1, F@_2, F@_3, F@_4, F@_5,
+					 F@_6, F@_7, F@_8, TrUserData)
     when N < 57 ->
-    d_field_ApbReadObjectResp_securecounter(Rest, N + 7,
-					    X bsl N + Acc, F@_1, F@_2, F@_3,
-					    F@_4, F@_5, F@_6, F@_7, F@_8,
-					    TrUserData);
-d_field_ApbReadObjectResp_securecounter(<<0:1, X:7,
-					  Rest/binary>>,
-					N, Acc, F@_1, F@_2, F@_3, F@_4, F@_5,
-					F@_6, Prev, F@_8, TrUserData) ->
+    d_field_ApbReadObjectResp_secure_counter(Rest, N + 7,
+					     X bsl N + Acc, F@_1, F@_2, F@_3,
+					     F@_4, F@_5, F@_6, F@_7, F@_8,
+					     TrUserData);
+d_field_ApbReadObjectResp_secure_counter(<<0:1, X:7,
+					   Rest/binary>>,
+					 N, Acc, F@_1, F@_2, F@_3, F@_4, F@_5,
+					 F@_6, Prev, F@_8, TrUserData) ->
     {NewFValue, RestF} = begin
 			   Len = X bsl N + Acc,
 			   <<Bs:Len/binary, Rest2/binary>> = Rest,
@@ -7077,19 +7082,19 @@ d_field_ApbReadObjectResp_securecounter(<<0:1, X:7,
 					 end,
 					 F@_8, TrUserData).
 
-d_field_ApbReadObjectResp_securebcounter(<<1:1, X:7,
-					   Rest/binary>>,
-					 N, Acc, F@_1, F@_2, F@_3, F@_4, F@_5,
-					 F@_6, F@_7, F@_8, TrUserData)
+d_field_ApbReadObjectResp_secure_bcounter(<<1:1, X:7,
+					    Rest/binary>>,
+					  N, Acc, F@_1, F@_2, F@_3, F@_4, F@_5,
+					  F@_6, F@_7, F@_8, TrUserData)
     when N < 57 ->
-    d_field_ApbReadObjectResp_securebcounter(Rest, N + 7,
-					     X bsl N + Acc, F@_1, F@_2, F@_3,
-					     F@_4, F@_5, F@_6, F@_7, F@_8,
-					     TrUserData);
-d_field_ApbReadObjectResp_securebcounter(<<0:1, X:7,
-					   Rest/binary>>,
-					 N, Acc, F@_1, F@_2, F@_3, F@_4, F@_5,
-					 F@_6, F@_7, Prev, TrUserData) ->
+    d_field_ApbReadObjectResp_secure_bcounter(Rest, N + 7,
+					      X bsl N + Acc, F@_1, F@_2, F@_3,
+					      F@_4, F@_5, F@_6, F@_7, F@_8,
+					      TrUserData);
+d_field_ApbReadObjectResp_secure_bcounter(<<0:1, X:7,
+					    Rest/binary>>,
+					  N, Acc, F@_1, F@_2, F@_3, F@_4, F@_5,
+					  F@_6, F@_7, Prev, TrUserData) ->
     {NewFValue, RestF} = begin
 			   Len = X bsl N + Acc,
 			   <<Bs:Len/binary, Rest2/binary>> = Rest,
@@ -8447,8 +8452,8 @@ d_enum_CRDT_type(12) -> 'FATCOUNTER';
 d_enum_CRDT_type(13) -> 'FLAG_EW';
 d_enum_CRDT_type(14) -> 'FLAG_DW';
 d_enum_CRDT_type(15) -> 'BCOUNTER';
-d_enum_CRDT_type(16) -> 'SECURECOUNTER';
-d_enum_CRDT_type(17) -> 'SECUREBCOUNTER';
+d_enum_CRDT_type(16) -> 'SECURE_COUNTER';
+d_enum_CRDT_type(17) -> 'SECURE_BCOUNTER';
 d_enum_CRDT_type(V) -> V.
 
 'd_enum_ApbSetUpdate.SetOpType'(1) -> 'ADD';
@@ -8942,20 +8947,20 @@ merge_msg_ApbUpdateOperation(#'ApbUpdateOperation'{counterop
 						   mapop = PFmapop,
 						   resetop = PFresetop,
 						   flagop = PFflagop,
-						   securecounterop =
-						       PFsecurecounterop,
-						   securebcounterop =
-						       PFsecurebcounterop},
+						   secure_counterop =
+						       PFsecure_counterop,
+						   secure_bcounterop =
+						       PFsecure_bcounterop},
 			     #'ApbUpdateOperation'{counterop = NFcounterop,
 						   setop = NFsetop,
 						   regop = NFregop,
 						   mapop = NFmapop,
 						   resetop = NFresetop,
 						   flagop = NFflagop,
-						   securecounterop =
-						       NFsecurecounterop,
-						   securebcounterop =
-						       NFsecurebcounterop},
+						   secure_counterop =
+						       NFsecure_counterop,
+						   secure_bcounterop =
+						       NFsecure_bcounterop},
 			     TrUserData) ->
     #'ApbUpdateOperation'{counterop =
 			      if PFcounterop /= undefined,
@@ -9003,27 +9008,27 @@ merge_msg_ApbUpdateOperation(#'ApbUpdateOperation'{counterop
 				 PFflagop == undefined -> NFflagop;
 				 NFflagop == undefined -> PFflagop
 			      end,
-			  securecounterop =
-			      if PFsecurecounterop /= undefined,
-				 NFsecurecounterop /= undefined ->
-				     merge_msg_ApbSecureCounterUpdate(PFsecurecounterop,
-								      NFsecurecounterop,
+			  secure_counterop =
+			      if PFsecure_counterop /= undefined,
+				 NFsecure_counterop /= undefined ->
+				     merge_msg_ApbSecureCounterUpdate(PFsecure_counterop,
+								      NFsecure_counterop,
 								      TrUserData);
-				 PFsecurecounterop == undefined ->
-				     NFsecurecounterop;
-				 NFsecurecounterop == undefined ->
-				     PFsecurecounterop
+				 PFsecure_counterop == undefined ->
+				     NFsecure_counterop;
+				 NFsecure_counterop == undefined ->
+				     PFsecure_counterop
 			      end,
-			  securebcounterop =
-			      if PFsecurebcounterop /= undefined,
-				 NFsecurebcounterop /= undefined ->
-				     merge_msg_ApbSecureBoundedCounterUpdate(PFsecurebcounterop,
-									     NFsecurebcounterop,
+			  secure_bcounterop =
+			      if PFsecure_bcounterop /= undefined,
+				 NFsecure_bcounterop /= undefined ->
+				     merge_msg_ApbSecureBoundedCounterUpdate(PFsecure_bcounterop,
+									     NFsecure_bcounterop,
 									     TrUserData);
-				 PFsecurebcounterop == undefined ->
-				     NFsecurebcounterop;
-				 NFsecurebcounterop == undefined ->
-				     PFsecurebcounterop
+				 PFsecure_bcounterop == undefined ->
+				     NFsecure_bcounterop;
+				 NFsecure_bcounterop == undefined ->
+				     PFsecure_bcounterop
 			      end}.
 
 -compile({nowarn_unused_function,merge_msg_ApbUpdateObjects/3}).
@@ -9152,18 +9157,18 @@ merge_msg_ApbReadObjectResp(#'ApbReadObjectResp'{counter
 						 set = PFset, reg = PFreg,
 						 mvreg = PFmvreg, map = PFmap,
 						 flag = PFflag,
-						 securecounter =
-						     PFsecurecounter,
-						 securebcounter =
-						     PFsecurebcounter},
+						 secure_counter =
+						     PFsecure_counter,
+						 secure_bcounter =
+						     PFsecure_bcounter},
 			    #'ApbReadObjectResp'{counter = NFcounter,
 						 set = NFset, reg = NFreg,
 						 mvreg = NFmvreg, map = NFmap,
 						 flag = NFflag,
-						 securecounter =
-						     NFsecurecounter,
-						 securebcounter =
-						     NFsecurebcounter},
+						 secure_counter =
+						     NFsecure_counter,
+						 secure_bcounter =
+						     NFsecure_bcounter},
 			    TrUserData) ->
     #'ApbReadObjectResp'{counter =
 			     if PFcounter /= undefined,
@@ -9209,25 +9214,27 @@ merge_msg_ApbReadObjectResp(#'ApbReadObjectResp'{counter
 				PFflag == undefined -> NFflag;
 				NFflag == undefined -> PFflag
 			     end,
-			 securecounter =
-			     if PFsecurecounter /= undefined,
-				NFsecurecounter /= undefined ->
-				    merge_msg_ApbGetSecureCounterResp(PFsecurecounter,
-								      NFsecurecounter,
+			 secure_counter =
+			     if PFsecure_counter /= undefined,
+				NFsecure_counter /= undefined ->
+				    merge_msg_ApbGetSecureCounterResp(PFsecure_counter,
+								      NFsecure_counter,
 								      TrUserData);
-				PFsecurecounter == undefined -> NFsecurecounter;
-				NFsecurecounter == undefined -> PFsecurecounter
+				PFsecure_counter == undefined ->
+				    NFsecure_counter;
+				NFsecure_counter == undefined ->
+				    PFsecure_counter
 			     end,
-			 securebcounter =
-			     if PFsecurebcounter /= undefined,
-				NFsecurebcounter /= undefined ->
-				    merge_msg_ApbGetSecureBoundedCounterResp(PFsecurebcounter,
-									     NFsecurebcounter,
+			 secure_bcounter =
+			     if PFsecure_bcounter /= undefined,
+				NFsecure_bcounter /= undefined ->
+				    merge_msg_ApbGetSecureBoundedCounterResp(PFsecure_bcounter,
+									     NFsecure_bcounter,
 									     TrUserData);
-				PFsecurebcounter == undefined ->
-				    NFsecurebcounter;
-				NFsecurebcounter == undefined ->
-				    PFsecurebcounter
+				PFsecure_bcounter == undefined ->
+				    NFsecure_bcounter;
+				NFsecure_bcounter == undefined ->
+				    PFsecure_bcounter
 			     end}.
 
 -compile({nowarn_unused_function,merge_msg_ApbReadObjectsResp/3}).
@@ -9876,8 +9883,8 @@ v_msg_ApbUpdateOperation(#'ApbUpdateOperation'{counterop
 					       setop = F2, regop = F3,
 					       mapop = F4, resetop = F5,
 					       flagop = F6,
-					       securecounterop = F7,
-					       securebcounterop = F8},
+					       secure_counterop = F7,
+					       secure_bcounterop = F8},
 			 Path, TrUserData) ->
     if F1 == undefined -> ok;
        true ->
@@ -9907,12 +9914,12 @@ v_msg_ApbUpdateOperation(#'ApbUpdateOperation'{counterop
     if F7 == undefined -> ok;
        true ->
 	   v_msg_ApbSecureCounterUpdate(F7,
-					[securecounterop | Path], TrUserData)
+					[secure_counterop | Path], TrUserData)
     end,
     if F8 == undefined -> ok;
        true ->
 	   v_msg_ApbSecureBoundedCounterUpdate(F8,
-					       [securebcounterop | Path],
+					       [secure_bcounterop | Path],
 					       TrUserData)
     end,
     ok;
@@ -10058,8 +10065,8 @@ v_msg_ApbReadObjectResp(#'ApbReadObjectResp'{counter =
 						 F1,
 					     set = F2, reg = F3, mvreg = F4,
 					     map = F5, flag = F6,
-					     securecounter = F7,
-					     securebcounter = F8},
+					     secure_counter = F7,
+					     secure_bcounter = F8},
 			Path, TrUserData) ->
     if F1 == undefined -> ok;
        true ->
@@ -10089,12 +10096,12 @@ v_msg_ApbReadObjectResp(#'ApbReadObjectResp'{counter =
     if F7 == undefined -> ok;
        true ->
 	   v_msg_ApbGetSecureCounterResp(F7,
-					 [securecounter | Path], TrUserData)
+					 [secure_counter | Path], TrUserData)
     end,
     if F8 == undefined -> ok;
        true ->
 	   v_msg_ApbGetSecureBoundedCounterResp(F8,
-						[securebcounter | Path],
+						[secure_bcounter | Path],
 						TrUserData)
     end,
     ok;
@@ -10279,9 +10286,10 @@ v_enum_CRDT_type('FATCOUNTER', _Path, _TrUserData) ->
 v_enum_CRDT_type('FLAG_EW', _Path, _TrUserData) -> ok;
 v_enum_CRDT_type('FLAG_DW', _Path, _TrUserData) -> ok;
 v_enum_CRDT_type('BCOUNTER', _Path, _TrUserData) -> ok;
-v_enum_CRDT_type('SECURECOUNTER', _Path, _TrUserData) ->
+v_enum_CRDT_type('SECURE_COUNTER', _Path,
+		 _TrUserData) ->
     ok;
-v_enum_CRDT_type('SECUREBCOUNTER', _Path,
+v_enum_CRDT_type('SECURE_BCOUNTER', _Path,
 		 _TrUserData) ->
     ok;
 v_enum_CRDT_type(V, Path, TrUserData)
@@ -10425,8 +10433,8 @@ get_msg_defs() ->
       [{'COUNTER', 3}, {'ORSET', 4}, {'LWWREG', 5},
        {'MVREG', 6}, {'GMAP', 8}, {'RWSET', 10}, {'RRMAP', 11},
        {'FATCOUNTER', 12}, {'FLAG_EW', 13}, {'FLAG_DW', 14},
-       {'BCOUNTER', 15}, {'SECURECOUNTER', 16},
-       {'SECUREBCOUNTER', 17}]},
+       {'BCOUNTER', 15}, {'SECURE_COUNTER', 16},
+       {'SECURE_BCOUNTER', 17}]},
      {{enum, 'ApbSetUpdate.SetOpType'},
       [{'ADD', 1}, {'REMOVE', 2}]},
      {{msg, 'ApbErrorResp'},
@@ -10573,10 +10581,10 @@ get_msg_defs() ->
        #field{name = flagop, fnum = 7, rnum = 7,
 	      type = {msg, 'ApbFlagUpdate'}, occurrence = optional,
 	      opts = []},
-       #field{name = securecounterop, fnum = 8, rnum = 8,
+       #field{name = secure_counterop, fnum = 8, rnum = 8,
 	      type = {msg, 'ApbSecureCounterUpdate'},
 	      occurrence = optional, opts = []},
-       #field{name = securebcounterop, fnum = 9, rnum = 9,
+       #field{name = secure_bcounterop, fnum = 9, rnum = 9,
 	      type = {msg, 'ApbSecureBoundedCounterUpdate'},
 	      occurrence = optional, opts = []}]},
      {{msg, 'ApbUpdateObjects'},
@@ -10641,10 +10649,10 @@ get_msg_defs() ->
        #field{name = flag, fnum = 7, rnum = 7,
 	      type = {msg, 'ApbGetFlagResp'}, occurrence = optional,
 	      opts = []},
-       #field{name = securecounter, fnum = 8, rnum = 8,
+       #field{name = secure_counter, fnum = 8, rnum = 8,
 	      type = {msg, 'ApbGetSecureCounterResp'},
 	      occurrence = optional, opts = []},
-       #field{name = securebcounter, fnum = 9, rnum = 9,
+       #field{name = secure_bcounter, fnum = 9, rnum = 9,
 	      type = {msg, 'ApbGetSecureBoundedCounterResp'},
 	      occurrence = optional, opts = []}]},
      {{msg, 'ApbReadObjectsResp'},
@@ -10908,10 +10916,10 @@ find_msg_def('ApbUpdateOperation') ->
      #field{name = flagop, fnum = 7, rnum = 7,
 	    type = {msg, 'ApbFlagUpdate'}, occurrence = optional,
 	    opts = []},
-     #field{name = securecounterop, fnum = 8, rnum = 8,
+     #field{name = secure_counterop, fnum = 8, rnum = 8,
 	    type = {msg, 'ApbSecureCounterUpdate'},
 	    occurrence = optional, opts = []},
-     #field{name = securebcounterop, fnum = 9, rnum = 9,
+     #field{name = secure_bcounterop, fnum = 9, rnum = 9,
 	    type = {msg, 'ApbSecureBoundedCounterUpdate'},
 	    occurrence = optional, opts = []}];
 find_msg_def('ApbUpdateObjects') ->
@@ -10976,10 +10984,10 @@ find_msg_def('ApbReadObjectResp') ->
      #field{name = flag, fnum = 7, rnum = 7,
 	    type = {msg, 'ApbGetFlagResp'}, occurrence = optional,
 	    opts = []},
-     #field{name = securecounter, fnum = 8, rnum = 8,
+     #field{name = secure_counter, fnum = 8, rnum = 8,
 	    type = {msg, 'ApbGetSecureCounterResp'},
 	    occurrence = optional, opts = []},
-     #field{name = securebcounter, fnum = 9, rnum = 9,
+     #field{name = secure_bcounter, fnum = 9, rnum = 9,
 	    type = {msg, 'ApbGetSecureBoundedCounterResp'},
 	    occurrence = optional, opts = []}];
 find_msg_def('ApbReadObjectsResp') ->
@@ -11035,8 +11043,8 @@ find_enum_def('CRDT_type') ->
     [{'COUNTER', 3}, {'ORSET', 4}, {'LWWREG', 5},
      {'MVREG', 6}, {'GMAP', 8}, {'RWSET', 10}, {'RRMAP', 11},
      {'FATCOUNTER', 12}, {'FLAG_EW', 13}, {'FLAG_DW', 14},
-     {'BCOUNTER', 15}, {'SECURECOUNTER', 16},
-     {'SECUREBCOUNTER', 17}];
+     {'BCOUNTER', 15}, {'SECURE_COUNTER', 16},
+     {'SECURE_BCOUNTER', 17}];
 find_enum_def('ApbSetUpdate.SetOpType') ->
     [{'ADD', 1}, {'REMOVE', 2}];
 find_enum_def(_) -> error.
@@ -11065,8 +11073,8 @@ enum_symbol_by_value_CRDT_type(12) -> 'FATCOUNTER';
 enum_symbol_by_value_CRDT_type(13) -> 'FLAG_EW';
 enum_symbol_by_value_CRDT_type(14) -> 'FLAG_DW';
 enum_symbol_by_value_CRDT_type(15) -> 'BCOUNTER';
-enum_symbol_by_value_CRDT_type(16) -> 'SECURECOUNTER';
-enum_symbol_by_value_CRDT_type(17) -> 'SECUREBCOUNTER'.
+enum_symbol_by_value_CRDT_type(16) -> 'SECURE_COUNTER';
+enum_symbol_by_value_CRDT_type(17) -> 'SECURE_BCOUNTER'.
 
 
 enum_value_by_symbol_CRDT_type('COUNTER') -> 3;
@@ -11080,8 +11088,8 @@ enum_value_by_symbol_CRDT_type('FATCOUNTER') -> 12;
 enum_value_by_symbol_CRDT_type('FLAG_EW') -> 13;
 enum_value_by_symbol_CRDT_type('FLAG_DW') -> 14;
 enum_value_by_symbol_CRDT_type('BCOUNTER') -> 15;
-enum_value_by_symbol_CRDT_type('SECURECOUNTER') -> 16;
-enum_value_by_symbol_CRDT_type('SECUREBCOUNTER') -> 17.
+enum_value_by_symbol_CRDT_type('SECURE_COUNTER') -> 16;
+enum_value_by_symbol_CRDT_type('SECURE_BCOUNTER') -> 17.
 
 'enum_symbol_by_value_ApbSetUpdate.SetOpType'(1) ->
     'ADD';
