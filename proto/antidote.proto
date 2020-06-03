@@ -17,6 +17,13 @@ enum CRDT_type {
     FLAG_EW = 13;
     FLAG_DW = 14;
     BCOUNTER = 15;
+    // Secure variants of CRDTs
+    SECUREORSET = 16;
+    SECURERWSET = 17;
+    SECURELWWREG = 18;
+    SECUREMVREG = 19;
+    SECUREGMAP = 20;
+    SECURERRMAP = 21;
 }
 
 // Riak Error response
