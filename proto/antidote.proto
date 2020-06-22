@@ -5,22 +5,26 @@ option java_package = "com.basho.riak.protobuf";
 option java_outer_classname = "AntidotePB";
 
 enum CRDT_type {
-  // Regular CRDTs
-  COUNTER = 3;
-  ORSET = 4;
-  LWWREG = 5;
-  MVREG = 6;
-  GMAP = 8;
-  RWSET = 10;
-  RRMAP = 11;
-  FATCOUNTER = 12;
-  FLAG_EW = 13;
-  FLAG_DW = 14;
-  BCOUNTER = 15;
-
-  // Secure CRDTs
-  SECURE_COUNTER = 16;
-  SECURE_BCOUNTER = 17;
+    COUNTER = 3;
+    ORSET = 4;
+    LWWREG = 5;
+    MVREG = 6;
+    GMAP = 8;
+    RWSET = 10;
+    RRMAP = 11;
+    FATCOUNTER = 12;
+    FLAG_EW = 13;
+    FLAG_DW = 14;
+    BCOUNTER = 15;
+    // Secure variants of CRDTs
+    SECUREORSET = 16;
+    SECURERWSET = 17;
+    SECURELWWREG = 18;
+    SECUREMVREG = 19;
+    SECUREGMAP = 20;
+    SECURERRMAP = 21;
+    SECURECOUNTER = 22;
+    SECUREBCOUNTER = 23;
 }
 
 // Riak Error response

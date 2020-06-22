@@ -50,7 +50,7 @@
 -include("gpb.hrl").
 
 %% enumerated types
--type 'CRDT_type'() :: 'COUNTER' | 'ORSET' | 'LWWREG' | 'MVREG' | 'GMAP' | 'RWSET' | 'RRMAP' | 'FATCOUNTER' | 'FLAG_EW' | 'FLAG_DW' | 'BCOUNTER' | 'SECURE_COUNTER' | 'SECURE_BCOUNTER'.
+-type 'CRDT_type'() :: 'COUNTER' | 'ORSET' | 'LWWREG' | 'MVREG' | 'GMAP' | 'RWSET' | 'RRMAP' | 'FATCOUNTER' | 'FLAG_EW' | 'FLAG_DW' | 'BCOUNTER' | 'SECUREORSET' | 'SECURERWSET' | 'SECURELWWREG' | 'SECUREMVREG' | 'SECUREGMAP' | 'SECURERRMAP' | 'SECURECOUNTER' | 'SECUREBCOUNTER'.
 -type 'ApbSetUpdate.SetOpType'() :: 'ADD' | 'REMOVE'.
 -export_type(['CRDT_type'/0, 'ApbSetUpdate.SetOpType'/0]).
 
@@ -1650,10 +1650,22 @@ e_enum_CRDT_type('FLAG_DW', Bin, _TrUserData) ->
     <<Bin/binary, 14>>;
 e_enum_CRDT_type('BCOUNTER', Bin, _TrUserData) ->
     <<Bin/binary, 15>>;
-e_enum_CRDT_type('SECURE_COUNTER', Bin, _TrUserData) ->
+e_enum_CRDT_type('SECUREORSET', Bin, _TrUserData) ->
     <<Bin/binary, 16>>;
-e_enum_CRDT_type('SECURE_BCOUNTER', Bin, _TrUserData) ->
+e_enum_CRDT_type('SECURERWSET', Bin, _TrUserData) ->
     <<Bin/binary, 17>>;
+e_enum_CRDT_type('SECURELWWREG', Bin, _TrUserData) ->
+    <<Bin/binary, 18>>;
+e_enum_CRDT_type('SECUREMVREG', Bin, _TrUserData) ->
+    <<Bin/binary, 19>>;
+e_enum_CRDT_type('SECUREGMAP', Bin, _TrUserData) ->
+    <<Bin/binary, 20>>;
+e_enum_CRDT_type('SECURERRMAP', Bin, _TrUserData) ->
+    <<Bin/binary, 21>>;
+e_enum_CRDT_type('SECURECOUNTER', Bin, _TrUserData) ->
+    <<Bin/binary, 22>>;
+e_enum_CRDT_type('SECUREBCOUNTER', Bin, _TrUserData) ->
+    <<Bin/binary, 23>>;
 e_enum_CRDT_type(V, Bin, _TrUserData) ->
     e_varint(V, Bin).
 
@@ -8452,8 +8464,14 @@ d_enum_CRDT_type(12) -> 'FATCOUNTER';
 d_enum_CRDT_type(13) -> 'FLAG_EW';
 d_enum_CRDT_type(14) -> 'FLAG_DW';
 d_enum_CRDT_type(15) -> 'BCOUNTER';
-d_enum_CRDT_type(16) -> 'SECURE_COUNTER';
-d_enum_CRDT_type(17) -> 'SECURE_BCOUNTER';
+d_enum_CRDT_type(16) -> 'SECUREORSET';
+d_enum_CRDT_type(17) -> 'SECURERWSET';
+d_enum_CRDT_type(18) -> 'SECURELWWREG';
+d_enum_CRDT_type(19) -> 'SECUREMVREG';
+d_enum_CRDT_type(20) -> 'SECUREGMAP';
+d_enum_CRDT_type(21) -> 'SECURERRMAP';
+d_enum_CRDT_type(22) -> 'SECURECOUNTER';
+d_enum_CRDT_type(23) -> 'SECUREBCOUNTER';
 d_enum_CRDT_type(V) -> V.
 
 'd_enum_ApbSetUpdate.SetOpType'(1) -> 'ADD';
@@ -10286,10 +10304,21 @@ v_enum_CRDT_type('FATCOUNTER', _Path, _TrUserData) ->
 v_enum_CRDT_type('FLAG_EW', _Path, _TrUserData) -> ok;
 v_enum_CRDT_type('FLAG_DW', _Path, _TrUserData) -> ok;
 v_enum_CRDT_type('BCOUNTER', _Path, _TrUserData) -> ok;
-v_enum_CRDT_type('SECURE_COUNTER', _Path,
-		 _TrUserData) ->
+v_enum_CRDT_type('SECUREORSET', _Path, _TrUserData) ->
     ok;
-v_enum_CRDT_type('SECURE_BCOUNTER', _Path,
+v_enum_CRDT_type('SECURERWSET', _Path, _TrUserData) ->
+    ok;
+v_enum_CRDT_type('SECURELWWREG', _Path, _TrUserData) ->
+    ok;
+v_enum_CRDT_type('SECUREMVREG', _Path, _TrUserData) ->
+    ok;
+v_enum_CRDT_type('SECUREGMAP', _Path, _TrUserData) ->
+    ok;
+v_enum_CRDT_type('SECURERRMAP', _Path, _TrUserData) ->
+    ok;
+v_enum_CRDT_type('SECURECOUNTER', _Path, _TrUserData) ->
+    ok;
+v_enum_CRDT_type('SECUREBCOUNTER', _Path,
 		 _TrUserData) ->
     ok;
 v_enum_CRDT_type(V, Path, TrUserData)
@@ -10433,8 +10462,11 @@ get_msg_defs() ->
       [{'COUNTER', 3}, {'ORSET', 4}, {'LWWREG', 5},
        {'MVREG', 6}, {'GMAP', 8}, {'RWSET', 10}, {'RRMAP', 11},
        {'FATCOUNTER', 12}, {'FLAG_EW', 13}, {'FLAG_DW', 14},
-       {'BCOUNTER', 15}, {'SECURE_COUNTER', 16},
-       {'SECURE_BCOUNTER', 17}]},
+       {'BCOUNTER', 15}, {'SECUREORSET', 16},
+       {'SECURERWSET', 17}, {'SECURELWWREG', 18},
+       {'SECUREMVREG', 19}, {'SECUREGMAP', 20},
+       {'SECURERRMAP', 21}, {'SECURECOUNTER', 22},
+       {'SECUREBCOUNTER', 23}]},
      {{enum, 'ApbSetUpdate.SetOpType'},
       [{'ADD', 1}, {'REMOVE', 2}]},
      {{msg, 'ApbErrorResp'},
@@ -11043,8 +11075,11 @@ find_enum_def('CRDT_type') ->
     [{'COUNTER', 3}, {'ORSET', 4}, {'LWWREG', 5},
      {'MVREG', 6}, {'GMAP', 8}, {'RWSET', 10}, {'RRMAP', 11},
      {'FATCOUNTER', 12}, {'FLAG_EW', 13}, {'FLAG_DW', 14},
-     {'BCOUNTER', 15}, {'SECURE_COUNTER', 16},
-     {'SECURE_BCOUNTER', 17}];
+     {'BCOUNTER', 15}, {'SECUREORSET', 16},
+     {'SECURERWSET', 17}, {'SECURELWWREG', 18},
+     {'SECUREMVREG', 19}, {'SECUREGMAP', 20},
+     {'SECURERRMAP', 21}, {'SECURECOUNTER', 22},
+     {'SECUREBCOUNTER', 23}];
 find_enum_def('ApbSetUpdate.SetOpType') ->
     [{'ADD', 1}, {'REMOVE', 2}];
 find_enum_def(_) -> error.
@@ -11073,8 +11108,14 @@ enum_symbol_by_value_CRDT_type(12) -> 'FATCOUNTER';
 enum_symbol_by_value_CRDT_type(13) -> 'FLAG_EW';
 enum_symbol_by_value_CRDT_type(14) -> 'FLAG_DW';
 enum_symbol_by_value_CRDT_type(15) -> 'BCOUNTER';
-enum_symbol_by_value_CRDT_type(16) -> 'SECURE_COUNTER';
-enum_symbol_by_value_CRDT_type(17) -> 'SECURE_BCOUNTER'.
+enum_symbol_by_value_CRDT_type(16) -> 'SECUREORSET';
+enum_symbol_by_value_CRDT_type(17) -> 'SECURERWSET';
+enum_symbol_by_value_CRDT_type(18) -> 'SECURELWWREG';
+enum_symbol_by_value_CRDT_type(19) -> 'SECUREMVREG';
+enum_symbol_by_value_CRDT_type(20) -> 'SECUREGMAP';
+enum_symbol_by_value_CRDT_type(21) -> 'SECURERRMAP';
+enum_symbol_by_value_CRDT_type(22) -> 'SECURECOUNTER';
+enum_symbol_by_value_CRDT_type(23) -> 'SECUREBCOUNTER'.
 
 
 enum_value_by_symbol_CRDT_type('COUNTER') -> 3;
@@ -11088,8 +11129,14 @@ enum_value_by_symbol_CRDT_type('FATCOUNTER') -> 12;
 enum_value_by_symbol_CRDT_type('FLAG_EW') -> 13;
 enum_value_by_symbol_CRDT_type('FLAG_DW') -> 14;
 enum_value_by_symbol_CRDT_type('BCOUNTER') -> 15;
-enum_value_by_symbol_CRDT_type('SECURE_COUNTER') -> 16;
-enum_value_by_symbol_CRDT_type('SECURE_BCOUNTER') -> 17.
+enum_value_by_symbol_CRDT_type('SECUREORSET') -> 16;
+enum_value_by_symbol_CRDT_type('SECURERWSET') -> 17;
+enum_value_by_symbol_CRDT_type('SECURELWWREG') -> 18;
+enum_value_by_symbol_CRDT_type('SECUREMVREG') -> 19;
+enum_value_by_symbol_CRDT_type('SECUREGMAP') -> 20;
+enum_value_by_symbol_CRDT_type('SECURERRMAP') -> 21;
+enum_value_by_symbol_CRDT_type('SECURECOUNTER') -> 22;
+enum_value_by_symbol_CRDT_type('SECUREBCOUNTER') -> 23.
 
 'enum_symbol_by_value_ApbSetUpdate.SetOpType'(1) ->
     'ADD';

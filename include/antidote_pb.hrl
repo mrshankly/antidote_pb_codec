@@ -102,7 +102,7 @@
 -define('APBMAPKEY_PB_H', true).
 -record('ApbMapKey',
         {key                    :: iodata(),        % = 1
-         type                   :: 'COUNTER' | 'ORSET' | 'LWWREG' | 'MVREG' | 'GMAP' | 'RWSET' | 'RRMAP' | 'FATCOUNTER' | 'FLAG_EW' | 'FLAG_DW' | 'BCOUNTER' | 'SECURE_COUNTER' | 'SECURE_BCOUNTER' | integer() % = 2, enum CRDT_type
+         type                   :: 'COUNTER' | 'ORSET' | 'LWWREG' | 'MVREG' | 'GMAP' | 'RWSET' | 'RRMAP' | 'FATCOUNTER' | 'FLAG_EW' | 'FLAG_DW' | 'BCOUNTER' | 'SECUREORSET' | 'SECURERWSET' | 'SECURELWWREG' | 'SECUREMVREG' | 'SECUREGMAP' | 'SECURERRMAP' | 'SECURECOUNTER' | 'SECUREBCOUNTER' | integer() % = 2, enum CRDT_type
         }).
 -endif.
 
@@ -180,7 +180,7 @@
 -define('APBBOUNDOBJECT_PB_H', true).
 -record('ApbBoundObject',
         {key                    :: iodata(),        % = 1
-         type                   :: 'COUNTER' | 'ORSET' | 'LWWREG' | 'MVREG' | 'GMAP' | 'RWSET' | 'RRMAP' | 'FATCOUNTER' | 'FLAG_EW' | 'FLAG_DW' | 'BCOUNTER' | 'SECURE_COUNTER' | 'SECURE_BCOUNTER' | integer(), % = 2, enum CRDT_type
+         type                   :: 'COUNTER' | 'ORSET' | 'LWWREG' | 'MVREG' | 'GMAP' | 'RWSET' | 'RRMAP' | 'FATCOUNTER' | 'FLAG_EW' | 'FLAG_DW' | 'BCOUNTER' | 'SECUREORSET' | 'SECURERWSET' | 'SECURELWWREG' | 'SECUREMVREG' | 'SECUREGMAP' | 'SECURERRMAP' | 'SECURECOUNTER' | 'SECUREBCOUNTER' | integer(), % = 2, enum CRDT_type
          bucket                 :: iodata()         % = 3
         }).
 -endif.

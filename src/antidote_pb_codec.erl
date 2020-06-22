@@ -50,7 +50,9 @@
 | {antidote_crdt_set_aw, [binary()]}
 | {antidote_crdt_set_rw, [binary()]}
 | {antidote_crdt_register_lww, binary()}
+| {antidote_secure_crdt_register_lww, binary()}
 | {antidote_crdt_register_mv, [binary()]}
+| {antidote_secure_crdt_register_mv, [binary()]}
 | {antidote_crdt_map_go, [{{Key :: binary(), Type :: atom()}, Value :: read_result_in()}]}
 | {antidote_crdt_map_rr, [{{Key :: binary(), Type :: atom()}, Value :: read_result_in()}]}
 | {antidote_crdt_flag_dw, boolean()}
@@ -504,21 +506,26 @@ encode_read_objects(Objects, TxId) ->
 %%AWMAP = 9;
 %%RWSET = 10;
 
-encode_type(antidote_crdt_counter_pn)       -> 'COUNTER';
-encode_type(antidote_crdt_counter_fat)      -> 'FATCOUNTER';
-encode_type(antidote_crdt_counter_b)        -> 'BCOUNTER';
-encode_type(antidote_crdt_counter_secure)   -> 'SECURECOUNTER';
-encode_type(antidote_crdt_counter_b_secure) -> 'SECUREBCOUNTER';
-encode_type(antidote_crdt_set_aw)           -> 'ORSET';
-encode_type(antidote_crdt_set_rw)           -> 'RWSET';
-encode_type(antidote_crdt_register_lww)     -> 'LWWREG';
-encode_type(antidote_crdt_register_mv)      -> 'MVREG';
-encode_type(antidote_crdt_map_go)           -> 'GMAP';
-encode_type(antidote_crdt_map_rr)           -> 'RRMAP';
-encode_type(antidote_crdt_flag_ew)          -> 'FLAG_EW';
-encode_type(antidote_crdt_flag_dw)          -> 'FLAG_DW';
-encode_type(T)                              -> erlang:error({unknown_crdt_type, T}).
-
+encode_type(antidote_crdt_counter_pn)          -> 'COUNTER';
+encode_type(antidote_crdt_counter_fat)         -> 'FATCOUNTER';
+encode_type(antidote_crdt_counter_b)           -> 'BCOUNTER';
+encode_type(antidote_crdt_counter_secure)      -> 'SECURECOUNTER';
+encode_type(antidote_crdt_counter_b_secure)    -> 'SECUREBCOUNTER';
+encode_type(antidote_crdt_set_aw)              -> 'ORSET';
+encode_type(antidote_crdt_set_rw)              -> 'RWSET';
+encode_type(antidote_crdt_register_lww)        -> 'LWWREG';
+encode_type(antidote_crdt_register_mv)         -> 'MVREG';
+encode_type(antidote_crdt_map_go)              -> 'GMAP';
+encode_type(antidote_crdt_map_rr)              -> 'RRMAP';
+encode_type(antidote_crdt_flag_ew)             -> 'FLAG_EW';
+encode_type(antidote_crdt_flag_dw)             -> 'FLAG_DW';
+encode_type(antidote_secure_crdt_set_aw)       -> 'SECUREORSET';
+encode_type(antidote_secure_crdt_set_rw)       -> 'SECURERWSET';
+encode_type(antidote_secure_crdt_register_lww) -> 'SECURELWWREG';
+encode_type(antidote_secure_crdt_register_mv)  -> 'SECUREMVREG';
+encode_type(antidote_secure_crdt_map_go)       -> 'SECUREGMAP';
+encode_type(antidote_secure_crdt_map_rr)       -> 'SECURERRMAP';
+encode_type(T)                                 -> erlang:error({unknown_crdt_type, T}).
 
 decode_type('COUNTER')        -> antidote_crdt_counter_pn;
 decode_type('FATCOUNTER')     -> antidote_crdt_counter_fat;
@@ -533,6 +540,12 @@ decode_type('RWSET')          -> antidote_crdt_set_rw;
 decode_type('RRMAP')          -> antidote_crdt_map_rr;
 decode_type('FLAG_EW')        -> antidote_crdt_flag_ew;
 decode_type('FLAG_DW')        -> antidote_crdt_flag_dw;
+decode_type('SECUREORSET')    -> antidote_secure_crdt_set_aw;
+decode_type('SECURERWSET')    -> antidote_secure_crdt_set_rw;
+decode_type('SECURELWWREG')   -> antidote_secure_crdt_register_lww;
+decode_type('SECUREMVREG')    -> antidote_secure_crdt_register_mv;
+decode_type('SECUREGMAP')     -> antidote_secure_crdt_map_go;
+decode_type('SECURERRMAP')    -> antidote_secure_crdt_map_rr;
 decode_type(T)                -> erlang:error({unknown_crdt_type_protobuf, T}).
 
 
@@ -556,13 +569,25 @@ encode_update_operation(antidote_crdt_set_aw, Op_Param) ->
   #'ApbUpdateOperation'{setop = encode_set_update(Op_Param)};
 encode_update_operation(antidote_crdt_set_rw, Op_Param) ->
   #'ApbUpdateOperation'{setop = encode_set_update(Op_Param)};
+encode_update_operation(antidote_secure_crdt_set_aw, Op_Param) ->
+  #'ApbUpdateOperation'{setop = encode_set_update(Op_Param)};
+encode_update_operation(antidote_secure_crdt_set_rw, Op_Param) ->
+  #'ApbUpdateOperation'{setop = encode_set_update(Op_Param)};
 encode_update_operation(antidote_crdt_register_lww, Op_Param) ->
   #'ApbUpdateOperation'{regop = encode_reg_update(Op_Param)};
 encode_update_operation(antidote_crdt_register_mv, Op_Param) ->
   #'ApbUpdateOperation'{regop = encode_reg_update(Op_Param)};
+encode_update_operation(antidote_secure_crdt_register_lww, Op_Param) ->
+  #'ApbUpdateOperation'{regop = encode_reg_update(Op_Param)};
+encode_update_operation(antidote_secure_crdt_register_mv, Op_Param) ->
+  #'ApbUpdateOperation'{regop = encode_reg_update(Op_Param)};
 encode_update_operation(antidote_crdt_map_go, Op_Param) ->
   #'ApbUpdateOperation'{mapop = encode_map_update(Op_Param)};
 encode_update_operation(antidote_crdt_map_rr, Op_Param) ->
+  #'ApbUpdateOperation'{mapop = encode_map_update(Op_Param)};
+encode_update_operation(antidote_secure_crdt_map_go, Op_Param) ->
+  #'ApbUpdateOperation'{mapop = encode_map_update(Op_Param)};
+encode_update_operation(antidote_secure_crdt_map_rr, Op_Param) ->
   #'ApbUpdateOperation'{mapop = encode_map_update(Op_Param)};
 encode_update_operation(antidote_crdt_flag_ew, Op_Param) ->
   #'ApbUpdateOperation'{flagop = encode_flag_update(Op_Param)};
@@ -592,31 +617,43 @@ decode_update_operation(#'ApbUpdateOperation'{resetop = #'ApbCrdtReset'{}}) ->
 
 
 encode_crdt_type(antidote_crdt_register_lww) ->
-    reg;
+  reg;
 encode_crdt_type(antidote_crdt_register_mv) ->
-    mvreg;
+  mvreg;
+encode_crdt_type(antidote_secure_crdt_register_lww) ->
+  reg;
+encode_crdt_type(antidote_secure_crdt_register_mv) ->
+  mvreg;
 encode_crdt_type(antidote_crdt_counter_pn) ->
-    counter;
+  counter;
 encode_crdt_type(antidote_crdt_counter_fat) ->
-    counter;
+  counter;
 encode_crdt_type(antidote_crdt_counter_b) ->
-    counter;
+  counter;
 encode_crdt_type(antidote_crdt_counter_secure) ->
-    secure_counter;
+  secure_counter;
 encode_crdt_type(antidote_crdt_counter_b_secure) ->
-    secure_bcounter;
+  secure_bcounter;
 encode_crdt_type(antidote_crdt_set_aw) ->
-    set;
+  set;
 encode_crdt_type(antidote_crdt_set_rw) ->
-    set;
+  set;
+encode_crdt_type(antidote_secure_crdt_set_aw) ->
+  set;
+encode_crdt_type(antidote_secure_crdt_set_rw) ->
+  set;
 encode_crdt_type(antidote_crdt_map_go) ->
-    map;
+  map;
 encode_crdt_type(antidote_crdt_map_rr) ->
-    map;
+  map;
+encode_crdt_type(antidote_secure_crdt_map_go) ->
+  map;
+encode_crdt_type(antidote_secure_crdt_map_rr) ->
+  map;
 encode_crdt_type(antidote_crdt_flag_ew) ->
-    flag;
+  flag;
 encode_crdt_type(antidote_crdt_flag_dw) ->
-    flag.
+  flag.
 
 encode_read_object_resp(reg, Val) ->
   #'ApbReadObjectResp'{reg = #'ApbGetRegResp'{value = Val}};
