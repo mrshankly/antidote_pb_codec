@@ -47,7 +47,9 @@
 | {antidote_crdt_set_aw, [binary()]}
 | {antidote_crdt_set_rw, [binary()]}
 | {antidote_crdt_register_lww, binary()}
+| {antidote_secure_crdt_register_lww, binary()}
 | {antidote_crdt_register_mv, [binary()]}
+| {antidote_secure_crdt_register_mv, [binary()]}
 | {antidote_crdt_map_go, [{{Key :: binary(), Type :: atom()}, Value :: read_result_in()}]}
 | {antidote_crdt_map_rr, [{{Key :: binary(), Type :: atom()}, Value :: read_result_in()}]}
 | {antidote_crdt_flag_dw, boolean()}
@@ -131,29 +133,29 @@ encode_response(Data) ->
 
 -type message() :: term().
 
-message_type_to_code('ApbErrorResp')             -> 0;
-message_type_to_code('ApbRegUpdate')             -> 107;
-message_type_to_code('ApbGetRegResp')            -> 108;
-message_type_to_code('ApbCounterUpdate')         -> 109;
-message_type_to_code('ApbGetCounterResp')        -> 110;
-message_type_to_code('ApbOperationResp')         -> 111;
-message_type_to_code('ApbSetUpdate')             -> 112;
-message_type_to_code('ApbGetSetResp')            -> 113;
-message_type_to_code('ApbTxnProperties')         -> 114;
-message_type_to_code('ApbBoundObject')           -> 115;
-message_type_to_code('ApbReadObjects')           -> 116;
-message_type_to_code('ApbUpdateOp')              -> 117;
-message_type_to_code('ApbUpdateObjects')         -> 118;
-message_type_to_code('ApbStartTransaction')      -> 119;
-message_type_to_code('ApbAbortTransaction')      -> 120;
-message_type_to_code('ApbCommitTransaction')     -> 121;
-message_type_to_code('ApbStaticUpdateObjects')   -> 122;
-message_type_to_code('ApbStaticReadObjects')     -> 123;
-message_type_to_code('ApbStartTransactionResp')  -> 124;
-message_type_to_code('ApbReadObjectResp')        -> 125;
-message_type_to_code('ApbReadObjectsResp')       -> 126;
-message_type_to_code('ApbCommitResp')            -> 127;
-message_type_to_code('ApbStaticReadObjectsResp') -> 128;
+message_type_to_code('ApbErrorResp')                   -> 0;
+message_type_to_code('ApbRegUpdate')                   -> 107;
+message_type_to_code('ApbGetRegResp')                  -> 108;
+message_type_to_code('ApbCounterUpdate')               -> 109;
+message_type_to_code('ApbGetCounterResp')              -> 110;
+message_type_to_code('ApbOperationResp')               -> 111;
+message_type_to_code('ApbSetUpdate')                   -> 112;
+message_type_to_code('ApbGetSetResp')                  -> 113;
+message_type_to_code('ApbTxnProperties')               -> 114;
+message_type_to_code('ApbBoundObject')                 -> 115;
+message_type_to_code('ApbReadObjects')                 -> 116;
+message_type_to_code('ApbUpdateOp')                    -> 117;
+message_type_to_code('ApbUpdateObjects')               -> 118;
+message_type_to_code('ApbStartTransaction')            -> 119;
+message_type_to_code('ApbAbortTransaction')            -> 120;
+message_type_to_code('ApbCommitTransaction')           -> 121;
+message_type_to_code('ApbStaticUpdateObjects')         -> 122;
+message_type_to_code('ApbStaticReadObjects')           -> 123;
+message_type_to_code('ApbStartTransactionResp')        -> 124;
+message_type_to_code('ApbReadObjectResp')              -> 125;
+message_type_to_code('ApbReadObjectsResp')             -> 126;
+message_type_to_code('ApbCommitResp')                  -> 127;
+message_type_to_code('ApbStaticReadObjectsResp')       -> 128;
 message_type_to_code('ApbCreateDC')                    -> 129;
 message_type_to_code('ApbCreateDCResp')                -> 130;
 message_type_to_code('ApbConnectToDCs')                -> 131;
