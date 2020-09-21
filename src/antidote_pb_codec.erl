@@ -39,7 +39,13 @@
 | {reg, binary()}
 | {mvreg, [binary()]}
 | {map, [{{Key :: binary(), Type :: atom()}, Value :: read_result()}]}
-| {flag, boolean()}.
+| {flag, boolean()}
+| {secure_counter, binary()}
+| {secure_set, [binary()]}
+| {secure_reg, binary()}
+| {secure_mvreg, [binary()]}
+| {secure_map, [{{Key :: binary(), Type :: atom()}, Value :: read_result()}]}
+.
 
 -type read_result_in() ::
   {antidote_crdt_counter_fat, integer()}
@@ -131,35 +137,37 @@ encode_response(Data) ->
 
 -type message() :: term().
 
-message_type_to_code('ApbErrorResp')             -> 0;
-message_type_to_code('ApbRegUpdate')             -> 107;
-message_type_to_code('ApbGetRegResp')            -> 108;
-message_type_to_code('ApbCounterUpdate')         -> 109;
-message_type_to_code('ApbGetCounterResp')        -> 110;
-message_type_to_code('ApbOperationResp')         -> 111;
-message_type_to_code('ApbSetUpdate')             -> 112;
-message_type_to_code('ApbGetSetResp')            -> 113;
-message_type_to_code('ApbTxnProperties')         -> 114;
-message_type_to_code('ApbBoundObject')           -> 115;
-message_type_to_code('ApbReadObjects')           -> 116;
-message_type_to_code('ApbUpdateOp')              -> 117;
-message_type_to_code('ApbUpdateObjects')         -> 118;
-message_type_to_code('ApbStartTransaction')      -> 119;
-message_type_to_code('ApbAbortTransaction')      -> 120;
-message_type_to_code('ApbCommitTransaction')     -> 121;
-message_type_to_code('ApbStaticUpdateObjects')   -> 122;
-message_type_to_code('ApbStaticReadObjects')     -> 123;
-message_type_to_code('ApbStartTransactionResp')  -> 124;
-message_type_to_code('ApbReadObjectResp')        -> 125;
-message_type_to_code('ApbReadObjectsResp')       -> 126;
-message_type_to_code('ApbCommitResp')            -> 127;
-message_type_to_code('ApbStaticReadObjectsResp') -> 128;
+message_type_to_code('ApbErrorResp')                   -> 0;
+message_type_to_code('ApbRegUpdate')                   -> 107;
+message_type_to_code('ApbGetRegResp')                  -> 108;
+message_type_to_code('ApbCounterUpdate')               -> 109;
+message_type_to_code('ApbGetCounterResp')              -> 110;
+message_type_to_code('ApbOperationResp')               -> 111;
+message_type_to_code('ApbSetUpdate')                   -> 112;
+message_type_to_code('ApbGetSetResp')                  -> 113;
+message_type_to_code('ApbTxnProperties')               -> 114;
+message_type_to_code('ApbBoundObject')                 -> 115;
+message_type_to_code('ApbReadObjects')                 -> 116;
+message_type_to_code('ApbUpdateOp')                    -> 117;
+message_type_to_code('ApbUpdateObjects')               -> 118;
+message_type_to_code('ApbStartTransaction')            -> 119;
+message_type_to_code('ApbAbortTransaction')            -> 120;
+message_type_to_code('ApbCommitTransaction')           -> 121;
+message_type_to_code('ApbStaticUpdateObjects')         -> 122;
+message_type_to_code('ApbStaticReadObjects')           -> 123;
+message_type_to_code('ApbStartTransactionResp')        -> 124;
+message_type_to_code('ApbReadObjectResp')              -> 125;
+message_type_to_code('ApbReadObjectsResp')             -> 126;
+message_type_to_code('ApbCommitResp')                  -> 127;
+message_type_to_code('ApbStaticReadObjectsResp')       -> 128;
 message_type_to_code('ApbCreateDC')                    -> 129;
 message_type_to_code('ApbCreateDCResp')                -> 130;
 message_type_to_code('ApbConnectToDCs')                -> 131;
 message_type_to_code('ApbConnectToDCsResp')            -> 132;
 message_type_to_code('ApbGetConnectionDescriptor')     -> 133;
-message_type_to_code('ApbGetConnectionDescriptorResp') -> 134.
+message_type_to_code('ApbGetConnectionDescriptorResp') -> 134;
+message_type_to_code('ApbSecureCounterUpdate')         -> 135;
+message_type_to_code('ApbGetSecureCounterResp')        -> 136.
 
 message_code_to_type(0)   -> 'ApbErrorResp';
 message_code_to_type(107) -> 'ApbRegUpdate';
@@ -189,7 +197,9 @@ message_code_to_type(130) -> 'ApbCreateDCResp';
 message_code_to_type(131) -> 'ApbConnectToDCs';
 message_code_to_type(132) -> 'ApbConnectToDCsResp';
 message_code_to_type(133) -> 'ApbGetConnectionDescriptor';
-message_code_to_type(134) -> 'ApbGetConnectionDescriptorResp'.
+message_code_to_type(134) -> 'ApbGetConnectionDescriptorResp';
+message_code_to_type(135) -> 'ApbSecureCounterUpdate';
+message_code_to_type(136) -> 'ApbGetSecureCounterResp'.
 
 -spec encode(message()) -> iolist().
 encode(Msg) ->
@@ -493,32 +503,46 @@ encode_read_objects(Objects, TxId) ->
 %%AWMAP = 9;
 %%RWSET = 10;
 
-encode_type(antidote_crdt_counter_pn)   -> 'COUNTER';
-encode_type(antidote_crdt_counter_fat)  -> 'FATCOUNTER';
-encode_type(antidote_crdt_counter_b)    -> 'BCOUNTER';
-encode_type(antidote_crdt_set_aw)       -> 'ORSET';
-encode_type(antidote_crdt_set_rw)       -> 'RWSET';
-encode_type(antidote_crdt_register_lww) -> 'LWWREG';
-encode_type(antidote_crdt_register_mv)  -> 'MVREG';
-encode_type(antidote_crdt_map_go)       -> 'GMAP';
-encode_type(antidote_crdt_map_rr)       -> 'RRMAP';
-encode_type(antidote_crdt_flag_ew)      -> 'FLAG_EW';
-encode_type(antidote_crdt_flag_dw)      -> 'FLAG_DW';
-encode_type(T)                          -> erlang:error({unknown_crdt_type, T}).
+encode_type(antidote_crdt_counter_pn)          -> 'COUNTER';
+encode_type(antidote_crdt_counter_fat)         -> 'FATCOUNTER';
+encode_type(antidote_crdt_counter_b)           -> 'BCOUNTER';
+encode_type(antidote_crdt_set_aw)              -> 'ORSET';
+encode_type(antidote_crdt_set_rw)              -> 'RWSET';
+encode_type(antidote_crdt_register_lww)        -> 'LWWREG';
+encode_type(antidote_crdt_register_mv)         -> 'MVREG';
+encode_type(antidote_crdt_map_go)              -> 'GMAP';
+encode_type(antidote_crdt_map_rr)              -> 'RRMAP';
+encode_type(antidote_crdt_flag_ew)             -> 'FLAG_EW';
+encode_type(antidote_crdt_flag_dw)             -> 'FLAG_DW';
+encode_type(antidote_crdt_secure_counter_pn)   -> 'SECURE_COUNTER';
+encode_type(antidote_crdt_secure_set_aw)       -> 'SECURE_ORSET';
+encode_type(antidote_crdt_secure_set_rw)       -> 'SECURE_RWSET';
+encode_type(antidote_crdt_secure_register_lww) -> 'SECURE_LWWREG';
+encode_type(antidote_crdt_secure_register_mv)  -> 'SECURE_MVREG';
+encode_type(antidote_crdt_secure_map_go)       -> 'SECURE_GMAP';
+encode_type(antidote_crdt_secure_map_rr)       -> 'SECURE_RRMAP';
+encode_type(T)                                 -> erlang:error({unknown_crdt_type, T}).
 
 
-decode_type('COUNTER')    -> antidote_crdt_counter_pn;
-decode_type('FATCOUNTER') -> antidote_crdt_counter_fat;
-decode_type('BCOUNTER')   -> antidote_crdt_counter_b;
-decode_type('ORSET')      -> antidote_crdt_set_aw;
-decode_type('LWWREG')     -> antidote_crdt_register_lww;
-decode_type('MVREG')      -> antidote_crdt_register_mv;
-decode_type('GMAP')       -> antidote_crdt_map_go;
-decode_type('RWSET')      -> antidote_crdt_set_rw;
-decode_type('RRMAP')      -> antidote_crdt_map_rr;
-decode_type('FLAG_EW')    -> antidote_crdt_flag_ew;
-decode_type('FLAG_DW')    -> antidote_crdt_flag_dw;
-decode_type(T)            -> erlang:error({unknown_crdt_type_protobuf, T}).
+decode_type('COUNTER')        -> antidote_crdt_counter_pn;
+decode_type('FATCOUNTER')     -> antidote_crdt_counter_fat;
+decode_type('BCOUNTER')       -> antidote_crdt_counter_b;
+decode_type('ORSET')          -> antidote_crdt_set_aw;
+decode_type('LWWREG')         -> antidote_crdt_register_lww;
+decode_type('MVREG')          -> antidote_crdt_register_mv;
+decode_type('GMAP')           -> antidote_crdt_map_go;
+decode_type('RWSET')          -> antidote_crdt_set_rw;
+decode_type('RRMAP')          -> antidote_crdt_map_rr;
+decode_type('FLAG_EW')        -> antidote_crdt_flag_ew;
+decode_type('FLAG_DW')        -> antidote_crdt_flag_dw;
+decode_type('SECURE_COUNTER') -> antidote_crdt_secure_counter_pn;
+decode_type('SECURE_ORSET')   -> antidote_crdt_secure_set_aw;
+decode_type('SECURE_RWSET')   -> antidote_crdt_secure_set_rw;
+decode_type('SECURE_LWWREG')  -> antidote_crdt_secure_register_lww;
+decode_type('SECURE_MVREG')   -> antidote_crdt_secure_register_mv;
+decode_type('SECURE_GMAP')    -> antidote_crdt_secure_map_go;
+decode_type('SECURE_RRMAP')   -> antidote_crdt_secure_map_rr;
+decode_type(T)                -> erlang:error({unknown_crdt_type_protobuf, T}).
 
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -549,6 +573,20 @@ encode_update_operation(antidote_crdt_flag_ew, Op_Param) ->
   #'ApbUpdateOperation'{flagop = encode_flag_update(Op_Param)};
 encode_update_operation(antidote_crdt_flag_dw, Op_Param) ->
   #'ApbUpdateOperation'{flagop = encode_flag_update(Op_Param)};
+encode_update_operation(antidote_crdt_counter_secure, Op_Param) ->
+  #'ApbUpdateOperation'{secure_counterop = encode_secure_counter_update(Op_Param)};
+encode_update_operation(antidote_secure_crdt_set_aw, Op_Param) ->
+  #'ApbUpdateOperation'{setop = encode_set_update(Op_Param)};
+encode_update_operation(antidote_secure_crdt_set_rw, Op_Param) ->
+  #'ApbUpdateOperation'{setop = encode_set_update(Op_Param)};
+encode_update_operation(antidote_secure_crdt_register_lww, Op_Param) ->
+  #'ApbUpdateOperation'{regop = encode_reg_update(Op_Param)};
+encode_update_operation(antidote_secure_crdt_register_mv, Op_Param) ->
+  #'ApbUpdateOperation'{regop = encode_reg_update(Op_Param)};
+encode_update_operation(antidote_secure_crdt_map_go, Op_Param) ->
+  #'ApbUpdateOperation'{mapop = encode_map_update(Op_Param)};
+encode_update_operation(antidote_secure_crdt_map_rr, Op_Param) ->
+  #'ApbUpdateOperation'{mapop = encode_map_update(Op_Param)};
 encode_update_operation(Type, _Op) ->
   throw({invalid_type, Type}).
 
@@ -562,6 +600,8 @@ decode_update_operation(#'ApbUpdateOperation'{mapop = Op}) when Op /= undefined 
   decode_map_update(Op);
 decode_update_operation(#'ApbUpdateOperation'{flagop = Op}) when Op /= undefined ->
   decode_flag_update(Op);
+decode_update_operation(#'ApbUpdateOperation'{secure_counterop = Op}) when Op /= undefined ->
+  decode_secure_counter_update(Op);
 decode_update_operation(#'ApbUpdateOperation'{resetop = #'ApbCrdtReset'{}}) ->
   {reset, {}}.
 
@@ -585,7 +625,21 @@ encode_crdt_type(antidote_crdt_map_rr) ->
 encode_crdt_type(antidote_crdt_flag_ew) ->
     flag;
 encode_crdt_type(antidote_crdt_flag_dw) ->
-    flag.
+    flag;
+encode_crdt_type(antidote_crdt_secure_counter_pn) ->
+    secure_counter;
+encode_crdt_type(antidote_crdt_secure_set_aw) ->
+    secure_set;
+encode_crdt_type(antidote_crdt_secure_set_rw) ->
+    secure_set;
+encode_crdt_type(antidote_crdt_secure_register_lww) ->
+    secure_reg;
+encode_crdt_type(antidote_crdt_secure_register_mv) ->
+    secure_mvreg;
+encode_crdt_type(antidote_crdt_secure_map_go) ->
+    secure_map;
+encode_crdt_type(antidote_crdt_secure_map_rr) ->
+    secure_map.
 
 encode_read_object_resp(reg, Val) ->
   #'ApbReadObjectResp'{reg = #'ApbGetRegResp'{value = Val}};
@@ -598,7 +652,17 @@ encode_read_object_resp(set, Val) ->
 encode_read_object_resp(map, Val) ->
   #'ApbReadObjectResp'{map = encode_map_get_resp(Val)};
 encode_read_object_resp(flag, Val) ->
-  #'ApbReadObjectResp'{flag = #'ApbGetFlagResp'{value = Val}}.
+  #'ApbReadObjectResp'{flag = #'ApbGetFlagResp'{value = Val}};
+encode_read_object_resp(secure_reg, Val) ->
+  #'ApbReadObjectResp'{secure_reg = #'ApbGetRegResp'{value = Val}};
+encode_read_object_resp(secure_mvreg, Val) ->
+  #'ApbReadObjectResp'{secure_mvreg = #'ApbGetMVRegResp'{values = Val}};
+encode_read_object_resp(secure_counter, Val) ->
+  #'ApbReadObjectResp'{secure_counter = #'ApbGetSecureCounterResp'{value = binary:encode_unsigned(Val)}};
+encode_read_object_resp(secure_set, Val) ->
+  #'ApbReadObjectResp'{secure_set = #'ApbGetSetResp'{value = Val}};
+encode_read_object_resp(secure_map, Val) ->
+  #'ApbReadObjectResp'{secure_map = encode_map_get_resp(Val)}.
 
 decode_read_object_resp(#'ApbReadObjectResp'{counter = #'ApbGetCounterResp'{value = Val}}) ->
   {counter, Val};
@@ -611,7 +675,17 @@ decode_read_object_resp(#'ApbReadObjectResp'{mvreg = #'ApbGetMVRegResp'{values =
 decode_read_object_resp(#'ApbReadObjectResp'{map = MapResp = #'ApbGetMapResp'{}}) ->
   {map, decode_map_get_resp(MapResp)};
 decode_read_object_resp(#'ApbReadObjectResp'{flag = #'ApbGetFlagResp'{value = Val}}) ->
-  {flag, Val}.
+  {flag, Val};
+decode_read_object_resp(#'ApbReadObjectResp'{secure_counter = #'ApbGetSecureCounterResp'{value = Value}}) ->
+  {secure_counter, binary:decode_unsigned(Value)};
+decode_read_object_resp(#'ApbReadObjectResp'{secure_set = #'ApbGetSetResp'{value = Val}}) ->
+  {secure_set, Val};
+decode_read_object_resp(#'ApbReadObjectResp'{secure_reg = #'ApbGetRegResp'{value = Val}}) ->
+  {secure_reg, Val};
+decode_read_object_resp(#'ApbReadObjectResp'{secure_mvreg = #'ApbGetMVRegResp'{values = Vals}}) ->
+  {secure_mvreg, Vals};
+decode_read_object_resp(#'ApbReadObjectResp'{secure_map = MapResp = #'ApbGetMapResp'{}}) ->
+  {secure_map, decode_map_get_resp(MapResp)}.
 
 % set updates
 
@@ -660,6 +734,22 @@ decode_counter_update(Update) ->
     I -> {increment, I} % negative value for I indicates decrement
   end.
 
+% secure counter updates
+
+encode_secure_counter_update({increment, {Delta, NSquare}}) ->
+  #'ApbSecureCounterUpdate'{
+    inc = binary:encode_unsigned(Delta),
+    nsquare = binary:encode_unsigned(NSquare)
+  };
+encode_secure_counter_update({increment, Delta}) ->
+  #'ApbSecureCounterUpdate'{inc = binary:encode_unsigned(Delta)}.
+
+decode_secure_counter_update(Update) ->
+  #'ApbSecureCounterUpdate'{inc = Delta, nsquare = NSquare} = Update,
+  case NSquare of
+    undefined -> {increment, binary:decode_unsigned(Delta)};
+    _ -> {increment, {binary:decode_unsigned(Delta), binary:decode_unsigned(NSquare)}}
+  end.
 
 % register updates
 
