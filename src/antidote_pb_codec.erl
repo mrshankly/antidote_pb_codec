@@ -740,16 +740,11 @@ encode_secure_counter_update({increment, {Delta, NSquare}}) ->
   #'ApbSecureCounterUpdate'{
     inc = binary:encode_unsigned(Delta),
     nsquare = binary:encode_unsigned(NSquare)
-  };
-encode_secure_counter_update({increment, Delta}) ->
-  #'ApbSecureCounterUpdate'{inc = binary:encode_unsigned(Delta)}.
+  }.
 
 decode_secure_counter_update(Update) ->
   #'ApbSecureCounterUpdate'{inc = Delta, nsquare = NSquare} = Update,
-  case NSquare of
-    undefined -> {increment, binary:decode_unsigned(Delta)};
-    _ -> {increment, {binary:decode_unsigned(Delta), binary:decode_unsigned(NSquare)}}
-  end.
+  {increment, {binary:decode_unsigned(Delta), binary:decode_unsigned(NSquare)}}.
 
 % register updates
 

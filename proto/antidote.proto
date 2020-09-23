@@ -53,7 +53,7 @@ message ApbGetCounterResp {
 // Counter increment request
 message ApbSecureCounterUpdate {
   required bytes inc = 1;
-  optional bytes nsquare = 2;
+  required bytes nsquare = 2;
 }
 
 // Response operation

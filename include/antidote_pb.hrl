@@ -33,7 +33,7 @@
 -define('APBSECURECOUNTERUPDATE_PB_H', true).
 -record('ApbSecureCounterUpdate',
         {inc                    :: iodata(),        % = 1
-         nsquare                :: iodata() | undefined % = 2
+         nsquare                :: iodata()         % = 2
         }).
 -endif.
 
